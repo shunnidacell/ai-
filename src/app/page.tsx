@@ -24,7 +24,7 @@ export default async function Home() {
 
   const hero = headlineCandidate && headlineDraft
     ? {
-        category: "注目",
+        category: "注目記事",
         date: "候補管理から選択",
         excerpt: headlineDraft.summary,
         href: `/articles/${headlineCandidate.id}`,
@@ -33,7 +33,7 @@ export default async function Home() {
         title: headlineDraft.title,
       }
     : {
-        category: lead.category,
+        category: "注目記事",
         date: lead.date,
         excerpt: lead.excerpt,
         href: `/articles/${lead.id}`,
@@ -44,7 +44,7 @@ export default async function Home() {
 
   return (
     <main
-      className="siteShell fixedBackdropShell"
+      className="siteShell fixedBackdropShell homeShell"
       style={{ "--page-bg": `url(${hero.image})` } as CSSProperties}
     >
       <SiteHeader />
@@ -58,12 +58,19 @@ export default async function Home() {
         <div className="heroOverlay" />
         <div className="heroContent">
           <span className="badge">{hero.category}</span>
-          <p className="sourceLine">
-            <span className="sourceAvatar">{hero.source.slice(0, 1)}</span>
-            {hero.source} ・ {hero.date}
-          </p>
           <h1>{hero.title}</h1>
           <p>{hero.excerpt}</p>
+          <p className="sourceLine">
+            <span className="sourceAvatar">{hero.source.slice(0, 1)}</span>
+            {hero.source} ・ {hero.date} ・ AIニュース
+          </p>
+          <span className="heroCta">続きを読む</span>
+        </div>
+        <div className="sliderDots" aria-hidden="true">
+          <span className="current" />
+          <span />
+          <span />
+          <span />
         </div>
       </Link>
 
@@ -75,7 +82,7 @@ export default async function Home() {
       <section className="dashboardGrid">
         <Panel title="最新記事" icon={<Sparkles size={18} />} id="latest">
           <div className="articleList">
-            {latestArticles.map((article, index) => (
+            {latestArticles.slice(0, 3).map((article, index) => (
               <Link
                 className="listArticle"
                 href={`/articles/${article.id}`}
@@ -96,24 +103,19 @@ export default async function Home() {
                   <p>
                     {article.source} ・ {article.date}
                   </p>
-                  <div className="tags">
-                    <span>{article.category}</span>
-                    <span>公式情報</span>
-                    <span>X埋め込み</span>
-                  </div>
                 </div>
               </Link>
             ))}
           </div>
         </Panel>
 
-        <Panel title="注目トピック" icon={<TrendingUp size={18} />} id="trend">
+        <Panel title="トレンドトピック" icon={<TrendingUp size={18} />} id="trend">
           <ol className="trendList">
             {trends.map((trend, index) => (
               <li key={trend.tag}>
                 <span className={`rank ${trend.tone}`}>{index + 1}</span>
                 <div>
-                  <strong>#{trend.tag}</strong>
+                  <strong>{trend.tag}</strong>
                   <small>{trend.posts}</small>
                 </div>
                 <span className={`spark ${trend.tone}`} />
@@ -122,9 +124,9 @@ export default async function Home() {
           </ol>
         </Panel>
 
-        <Panel title="注目記事" icon={<Eye size={18} />} id="featured">
+        <Panel title="人気記事" icon={<Eye size={18} />} id="featured">
           <div className="popularList">
-            {latestArticles.map((article, index) => (
+            {latestArticles.slice(0, 3).map((article, index) => (
               <Link
                 className="popularItem"
                 href={`/articles/${article.id}`}
@@ -136,7 +138,6 @@ export default async function Home() {
                   <strong>{article.title}</strong>
                   <small>{article.date}</small>
                 </div>
-                <em>{article.views}</em>
               </Link>
             ))}
           </div>
