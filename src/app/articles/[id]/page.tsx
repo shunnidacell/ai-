@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
 import { ArrowLeft, MessageSquareQuote, Sparkles } from "lucide-react";
 import { XPostCard } from "@/components/x-post-card";
@@ -37,7 +38,14 @@ export default async function ArticlePage({
   const draft = buildCandidateDraft(candidate);
 
   return (
-    <main className="siteShell">
+    <main
+      className="siteShell articleBackdropShell"
+      style={
+        {
+          "--article-bg": `url(${getCandidateImage(candidate)})`,
+        } as CSSProperties
+      }
+    >
       <ArticleHeader />
 
       <article className="articleLayout">
@@ -109,7 +117,14 @@ function PublishedArticle({
   article: (typeof latestArticles)[number];
 }) {
   return (
-    <main className="siteShell">
+    <main
+      className="siteShell articleBackdropShell"
+      style={
+        {
+          "--article-bg": `url(${article.image})`,
+        } as CSSProperties
+      }
+    >
       <ArticleHeader />
 
       <article className="articleLayout">

@@ -690,6 +690,36 @@ h1 {
   margin-bottom: 22px;
 }
 
+.articleBackdropShell {
+  position: relative;
+  isolation: isolate;
+}
+
+.articleBackdropShell::before {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-image:
+    linear-gradient(180deg, rgba(5, 9, 19, 0.66), rgba(5, 9, 19, 0.96) 58%, #050913),
+    var(--article-bg);
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+  content: "";
+}
+
+.articleBackdropShell::after {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 24% 10%, rgba(47, 125, 255, 0.2), transparent 26rem),
+    radial-gradient(circle at 78% 0%, rgba(139, 92, 246, 0.16), transparent 28rem),
+    rgba(5, 9, 19, 0.34);
+  content: "";
+  pointer-events: none;
+}
+
 .compactBrand {
   min-width: 0;
 }
@@ -723,13 +753,15 @@ h1 {
   isolation: isolate;
   min-height: 420px;
   overflow: hidden;
-  border: 1px solid rgba(80, 133, 230, 0.62);
-  border-radius: 18px;
-  background: #07101f;
+  border: 1px solid rgba(150, 180, 255, 0.34);
+  border-radius: 0;
+  background: rgba(5, 9, 19, 0.18);
+  box-shadow: 0 26px 90px rgba(0, 0, 0, 0.42);
 }
 
 .articleHeroFixedBg {
   background-attachment: fixed;
+  opacity: 0.72;
 }
 
 .articleHeroOverlay {
@@ -781,7 +813,8 @@ h1 {
 .reactionPanel {
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: var(--panel-strong);
+  background: rgba(12, 22, 39, 0.88);
+  backdrop-filter: blur(18px);
 }
 
 .articleBody {
