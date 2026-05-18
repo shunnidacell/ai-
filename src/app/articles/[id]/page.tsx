@@ -124,6 +124,7 @@ function PublishedArticle({
             <p>
               {article.source} ・ {article.date}
             </p>
+            <p className="imageCredit">{article.imageSource}</p>
             <h1>{article.title}</h1>
           </div>
         </section>

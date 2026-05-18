@@ -32,6 +32,7 @@ export type Article = {
   category: string;
   image: string;
   imagePrompt: string;
+  imageSource: string;
   excerpt: string;
   body: string[];
   views: string;
@@ -90,7 +91,8 @@ export const latestArticles: Article[] = [
     category: "安全性",
     image: "/article-anthropic-opus-46.png",
     imagePrompt:
-      "AI safety evaluation and model system cards, dark editorial hero image, no text.",
+      "Generated from the source post text: future frontier models, AI Safety Level 4 threshold, sabotage risk reports, Claude Opus 4.6 commitment, dark editorial hero image, no text.",
+    imageSource: "元ポスト本文からAI生成",
     excerpt:
       "Claude Opus 4.6の安全性評価や運用上の注意点を確認できる一次情報です。",
     body: [
@@ -131,7 +133,8 @@ export const latestArticles: Article[] = [
     category: "研究",
     image: "/article-model-distillation.png",
     imagePrompt:
-      "AI security research and model extraction defense, dark editorial hero image, no text.",
+      "Generated from the source post text: industrial-scale distillation attacks, fraudulent accounts, millions of Claude exchanges, model extraction defense, dark editorial hero image, no text.",
+    imageSource: "元ポスト本文からAI生成",
     excerpt:
       "商用AIモデルの保護とAPI運用に関わるセキュリティ研究です。",
     body: [
@@ -172,7 +175,8 @@ export const latestArticles: Article[] = [
     category: "生成AI",
     image: "/article-google-lyria-3-pro.png",
     imagePrompt:
-      "Generative music AI and waveform interface, dark editorial hero image, no text.",
+      "Generated from the source post text: Lyria 3 Pro, studio access, Gemini app, Google AI Studio, Gemini API, Vertex AI, Google Vids, dark editorial hero image, no text.",
+    imageSource: "元ポスト本文からAI生成",
     excerpt:
       "生成AIの活用領域が音楽制作にも広がっていることを示す更新です。",
     body: [
@@ -213,7 +217,8 @@ export const latestArticles: Article[] = [
     category: "AI検索",
     image: "/article-perplexity-bluematrix.png",
     imagePrompt:
-      "AI search partnership and enterprise intelligence network, dark editorial hero image, no text.",
+      "Generated from the source post text: BlueMatrix partnership, equity research, Perplexity Enterprise, buy-side professionals, real-time financial data, dark editorial hero image, no text.",
+    imageSource: "元ポスト本文からAI生成",
     excerpt:
       "AI検索・調査領域での企業連携として注目されるニュースです。",
     body: [
