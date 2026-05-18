@@ -46,6 +46,13 @@ const developerAccounts = new Set([
 
 const storePath = path.join(process.cwd(), "data", "x-post-candidates.json");
 
+const knownImages: Record<string, string> = {
+  "2011484983391559697": "/article-perplexity-bluematrix.png",
+  "2021397952791707696": "/article-anthropic-opus-46.png",
+  "2025997928242811253": "/article-model-distillation.png",
+  "2036836242076188816": "/article-google-lyria-3-pro.png",
+};
+
 const knownDrafts: Record<string, CandidateDraft> = {
   "2021397952791707696": {
     title: "Anthropic、Claude Opus 4.6のシステムカードを公開",
@@ -183,6 +190,10 @@ export function buildCandidateDraft(candidate: XPostCandidate): CandidateDraft {
         "Dark editorial hero image for AI industry news, no text, no logos.",
     }
   );
+}
+
+export function getCandidateImage(candidate: XPostCandidate) {
+  return knownImages[candidate.statusId] ?? "/ai-chip-hero.png";
 }
 
 export async function registerCandidate(inputUrl: string) {

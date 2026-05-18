@@ -1,8 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Flame, Search, Sparkles, TrendingUp } from "lucide-react";
+import { Eye, Search, Sparkles, TrendingUp } from "lucide-react";
 import { latestArticles, trends } from "@/lib/mock-data";
-import { buildCandidateDraft, readCandidates } from "@/lib/x-candidates";
+import {
+  buildCandidateDraft,
+  getCandidateImage,
+  readCandidates,
+} from "@/lib/x-candidates";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +26,7 @@ export default async function Home() {
         date: "候補管理から選択",
         excerpt: headlineDraft.summary,
         href: `/articles/${headlineCandidate.id}`,
-        image: "/ai-chip-hero.png",
+        image: getCandidateImage(headlineCandidate),
         source: headlineCandidate.author,
         title: headlineDraft.title,
       }
@@ -50,8 +54,8 @@ export default async function Home() {
         <nav className="navLinks" aria-label="メインメニュー">
           <Link className="active" href="/">ホーム</Link>
           <a href="#latest">最新記事</a>
-          <a href="#trend">トレンド</a>
-          <a href="#popular">人気記事</a>
+          <a href="#trend">注目トピック</a>
+          <a href="#featured">注目記事</a>
         </nav>
 
         <label className="searchBox">
@@ -121,7 +125,7 @@ export default async function Home() {
           </div>
         </Panel>
 
-        <Panel title="トレンドトピック" icon={<TrendingUp size={18} />} id="trend">
+        <Panel title="注目トピック" icon={<TrendingUp size={18} />} id="trend">
           <ol className="trendList">
             {trends.map((trend, index) => (
               <li key={trend.tag}>
@@ -136,7 +140,7 @@ export default async function Home() {
           </ol>
         </Panel>
 
-        <Panel title="人気記事" icon={<Flame size={18} />} id="popular">
+        <Panel title="注目記事" icon={<Eye size={18} />} id="featured">
           <div className="popularList">
             {latestArticles.map((article, index) => (
               <Link
