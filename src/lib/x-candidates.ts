@@ -56,7 +56,7 @@ const knownDrafts: Record<string, CandidateDraft> = {
     body: [
       "Anthropicは公式Xで、Claude Opus 4.6のシステムカード公開を告知しました。",
       "システムカードは、モデルの安全性評価、リスク管理、利用制限を確認するための重要な一次情報です。",
-      "企業や開発者は、性能だけでなく、導入時の安全性や利用条件を確認する必要があります。",
+      "企業や開発者は、性能だけでなく導入時の安全性や利用条件を確認する必要があります。",
     ],
     imagePrompt:
       "Dark editorial hero image about AI safety evaluation and model system cards, no text.",
@@ -66,7 +66,7 @@ const knownDrafts: Record<string, CandidateDraft> = {
     translation:
       "Anthropicはモデル蒸留攻撃と、その対策技術に関する研究を公開したと説明しています。",
     summary:
-      "商用AIモデルの保護やAPI運用に関わるセキュリティ研究です。",
+      "商用AIモデルの保護とAPI運用に関わるセキュリティ研究です。",
     body: [
       "Anthropicは公式Xで、モデル蒸留攻撃と防御手法に関する研究を公開したと告知しました。",
       "モデル蒸留攻撃は、対象モデルの出力を利用して似た振る舞いをする別モデルを作るリスクにつながります。",
@@ -170,14 +170,14 @@ export function classifyCandidate(author: string) {
 export function buildCandidateDraft(candidate: XPostCandidate): CandidateDraft {
   return (
     knownDrafts[candidate.statusId] ?? {
-      title: `${candidate.author}の公式X投稿を確認`,
+      title: `${candidate.author}の公式ポストを確認`,
       translation:
-        "この投稿はまだ本文取得・翻訳が完了していません。X埋め込みを確認してから公開判断してください。",
+        "このポストはまだ本文取得と翻訳が完了していません。X埋め込みを確認してから公開判断してください。",
       summary:
-        "公式ポストURLは登録済みです。公開前に内容確認と本文編集が必要です。",
+        "公式のXポストURLは登録済みです。公開前に内容確認と本文編集が必要です。",
       body: [
         "この候補はXポストURLから登録されました。",
-        "本文取得と事実確認がまだ完了していないため、公開前に公式埋め込みの内容を確認してください。",
+        "本文取得と事実確認がまだ完了していないため、公開前に公式情報の内容を確認してください。",
       ],
       imagePrompt:
         "Dark editorial hero image for AI industry news, no text, no logos.",
