@@ -1,7 +1,13 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
-import { ArrowLeft, MessageSquareQuote, Sparkles } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  MessageSquareQuote,
+  Sparkles,
+} from "lucide-react";
+import { SiteHeader } from "@/components/site-header";
 import { XPostCard } from "@/components/x-post-card";
 import { latestArticles } from "@/lib/mock-data";
 import {
@@ -46,7 +52,7 @@ export default async function ArticlePage({
         } as CSSProperties
       }
     >
-      <ArticleHeader />
+      <SiteHeader />
 
       <article className="articleLayout">
         <section className="articleHero">
@@ -58,7 +64,7 @@ export default async function ArticlePage({
           <div className="articleHeroOverlay" />
           <div className="articleHeroText">
             <span className="badge">注目</span>
-            <p>{candidate.author} ・ X公式ポスト</p>
+            <p>{candidate.author} ・ Xポスト</p>
             <h1>{draft.title}</h1>
           </div>
         </section>
@@ -67,7 +73,7 @@ export default async function ArticlePage({
           <div className="articleBody">
             <div className="generatedNotice">
               <Sparkles size={16} />
-              Xの公式ポストをもとに、編集用ドラフトから記事化しています。
+              Xポストをもとに編集したAIニュース記事です。
             </div>
 
             <section className="embeddedPostBlock">
@@ -78,7 +84,7 @@ export default async function ArticlePage({
                   body: draft.translation,
                   handle: candidate.author,
                   likes: "-",
-                  newsValue: "公式情報",
+                  newsValue: "Xポスト",
                   reposts: "-",
                   time: "",
                   url: candidate.url,
@@ -116,6 +122,10 @@ function PublishedArticle({
 }: {
   article: (typeof latestArticles)[number];
 }) {
+  const index = latestArticles.findIndex((item) => item.id === article.id);
+  const previous = latestArticles[index - 1] ?? latestArticles.at(-1);
+  const next = latestArticles[index + 1] ?? latestArticles[0];
+
   return (
     <main
       className="siteShell fixedBackdropShell articleBackdropShell"
@@ -125,7 +135,8 @@ function PublishedArticle({
         } as CSSProperties
       }
     >
-      <ArticleHeader />
+      <SiteHeader />
+      <ArticleSidePager previous={previous} next={next} />
 
       <article className="articleLayout">
         <section className="articleHero">
@@ -157,10 +168,10 @@ function PublishedArticle({
               <XPostCard post={article.featuredPost} />
             </section>
 
-            {article.body.map((paragraph, index) => (
+            {article.body.map((paragraph, bodyIndex) => (
               <div key={paragraph}>
                 <p>{paragraph}</p>
-                {index === 0 && article.relatedPosts.length > 0 && (
+                {bodyIndex === 0 && article.relatedPosts.length > 0 && (
                   <section className="embeddedPostBlock inlinePosts">
                     <h2>関連ポスト</h2>
                     <div className="inlinePostGrid">
@@ -203,20 +214,35 @@ function PublishedArticle({
   );
 }
 
-function ArticleHeader() {
+function ArticleSidePager({
+  next,
+  previous,
+}: {
+  next?: (typeof latestArticles)[number];
+  previous?: (typeof latestArticles)[number];
+}) {
   return (
-    <header className="articleTop">
-      <Link className="backLink" href="/">
-        <ArrowLeft size={18} />
-        トップへ戻る
-      </Link>
-      <Link className="brand compactBrand" href="/">
-        <span className="brandIcon">AI</span>
-        <span>
-          <strong>AI Insight JP</strong>
-          <small>AIの今を、深く、分かりやすく。</small>
-        </span>
-      </Link>
-    </header>
+    <>
+      {previous && (
+        <Link
+          aria-label={`前の記事: ${previous.title}`}
+          className="sidePager sidePagerLeft"
+          href={`/articles/${previous.id}`}
+        >
+          <ChevronLeft size={26} />
+          <span>前の記事</span>
+        </Link>
+      )}
+      {next && (
+        <Link
+          aria-label={`次の記事: ${next.title}`}
+          className="sidePager sidePagerRight"
+          href={`/articles/${next.id}`}
+        >
+          <span>次の記事</span>
+          <ChevronRight size={26} />
+        </Link>
+      )}
+    </>
   );
 }

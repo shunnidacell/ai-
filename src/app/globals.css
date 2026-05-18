@@ -90,10 +90,14 @@ button {
 
 .siteHeader {
   display: grid;
-  grid-template-columns: auto minmax(420px, 1fr) 260px;
+  grid-template-columns: auto 1fr;
   align-items: center;
   gap: 28px;
   margin-bottom: 28px;
+}
+
+.simpleHeader {
+  min-height: 64px;
 }
 
 .brand {
@@ -133,7 +137,7 @@ button {
 .navLinks {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 28px;
   color: var(--muted);
   font-size: 14px;
@@ -166,6 +170,19 @@ button {
   content: "";
 }
 
+.simpleNav a {
+  border: 1px solid rgba(216, 226, 242, 0.18);
+  border-radius: 999px;
+  padding: 10px 15px;
+  background: rgba(5, 9, 19, 0.28);
+  backdrop-filter: blur(14px);
+}
+
+.simpleNav a:hover {
+  border-color: rgba(103, 164, 255, 0.52);
+  background: rgba(47, 125, 255, 0.14);
+}
+
 .searchBox {
   display: flex;
   align-items: center;
@@ -196,12 +213,13 @@ button {
   display: block;
   min-height: 330px;
   overflow: hidden;
-  border: 1px solid rgba(80, 133, 230, 0.62);
-  border-radius: 18px;
-  background: #07101f;
+  border: 0;
+  border-radius: 0;
+  background: rgba(5, 9, 19, 0.18);
   box-shadow:
-    0 0 0 1px rgba(139, 92, 246, 0.12),
-    0 22px 80px rgba(0, 0, 0, 0.28);
+    inset 0 -90px 120px rgba(5, 9, 19, 0.52),
+    0 22px 90px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(3px);
 }
 
 .hasHeroImage {
@@ -221,6 +239,8 @@ button {
 
 .heroFixedBg {
   background-attachment: fixed;
+  filter: saturate(1.08) blur(1.5px);
+  transform: scale(1.03);
 }
 
 .heroOverlay {
@@ -230,6 +250,36 @@ button {
   background:
     linear-gradient(90deg, rgba(5, 9, 19, 0.96) 0%, rgba(5, 9, 19, 0.78) 38%, rgba(5, 9, 19, 0.22) 100%),
     linear-gradient(180deg, rgba(5, 9, 19, 0), rgba(5, 9, 19, 0.18));
+}
+
+.simplePagePanel {
+  width: min(760px, 100%);
+  margin-top: 80px;
+  border: 1px solid rgba(216, 226, 242, 0.16);
+  border-radius: 0;
+  padding: 42px;
+  background: rgba(12, 22, 39, 0.78);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.32);
+}
+
+.simplePagePanel h1 {
+  max-width: none;
+  font-size: 42px;
+}
+
+.simplePagePanel p {
+  margin-top: 18px;
+  color: #d8e2f2;
+  font-size: 17px;
+  line-height: 1.9;
+}
+
+.simplePagePanel a {
+  display: inline-flex;
+  margin-top: 24px;
+  color: #9bc3ff;
+  font-weight: 900;
 }
 
 .heroContent {
@@ -750,15 +800,18 @@ h1 {
   isolation: isolate;
   min-height: 420px;
   overflow: hidden;
-  border: 1px solid rgba(150, 180, 255, 0.34);
+  border: 0;
   border-radius: 0;
-  background: rgba(5, 9, 19, 0.18);
+  background: rgba(5, 9, 19, 0.12);
   box-shadow: 0 26px 90px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(3px);
 }
 
 .articleHeroFixedBg {
   background-attachment: fixed;
   opacity: 0.72;
+  filter: saturate(1.08) blur(1.5px);
+  transform: scale(1.03);
 }
 
 .articleHeroOverlay {
@@ -804,6 +857,37 @@ h1 {
   grid-template-columns: minmax(0, 1fr) 360px;
   gap: 18px;
   align-items: start;
+}
+
+.sidePager {
+  position: fixed;
+  top: 50%;
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(216, 226, 242, 0.18);
+  border-radius: 999px;
+  padding: 12px 14px;
+  background: rgba(5, 9, 19, 0.52);
+  color: #dce9ff;
+  font-size: 13px;
+  font-weight: 900;
+  backdrop-filter: blur(18px);
+  transform: translateY(-50%);
+}
+
+.sidePager:hover {
+  border-color: rgba(103, 164, 255, 0.52);
+  background: rgba(47, 125, 255, 0.18);
+}
+
+.sidePagerLeft {
+  left: 18px;
+}
+
+.sidePagerRight {
+  right: 18px;
 }
 
 .articleBody,

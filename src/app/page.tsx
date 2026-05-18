@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { Eye, Search, Sparkles, TrendingUp } from "lucide-react";
+import { Eye, Sparkles, TrendingUp } from "lucide-react";
+import { SiteHeader } from "@/components/site-header";
 import { latestArticles, trends } from "@/lib/mock-data";
 import {
   buildCandidateDraft,
@@ -46,27 +47,7 @@ export default async function Home() {
       className="siteShell fixedBackdropShell"
       style={{ "--page-bg": `url(${hero.image})` } as CSSProperties}
     >
-      <header className="siteHeader">
-        <Link className="brand" href="/">
-          <span className="brandIcon">AI</span>
-          <span>
-            <strong>AI Insight JP</strong>
-            <small>AIの今を、深く、分かりやすく。</small>
-          </span>
-        </Link>
-
-        <nav className="navLinks" aria-label="メインメニュー">
-          <Link className="active" href="/">ホーム</Link>
-          <a href="#latest">最新記事</a>
-          <a href="#trend">注目トピック</a>
-          <a href="#featured">注目記事</a>
-        </nav>
-
-        <label className="searchBox">
-          <Search size={17} />
-          <input placeholder="キーワードで検索" />
-        </label>
-      </header>
+      <SiteHeader />
 
       <Link className="heroCard hasHeroImage" href={hero.href}>
         <div

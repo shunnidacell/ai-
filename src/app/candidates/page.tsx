@@ -1,10 +1,10 @@
 import Image from "next/image";
-import Link from "next/link";
 import type { CSSProperties } from "react";
-import { ArrowLeft, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { CandidateDecisionButtons } from "@/components/candidate-decision-buttons";
 import { CollectWithHermesButton } from "@/components/collect-with-hermes-button";
 import { DeleteCandidateButton } from "@/components/delete-candidate-button";
+import { SiteHeader } from "@/components/site-header";
 import { XEmbed } from "@/components/x-embed";
 import {
   buildCandidateDraft,
@@ -26,19 +26,7 @@ export default async function CandidatesPage() {
       className="siteShell fixedBackdropShell"
       style={{ "--page-bg": `url(${backdropImage})` } as CSSProperties}
     >
-      <header className="articleTop">
-        <Link className="backLink" href="/">
-          <ArrowLeft size={18} />
-          トップへ戻る
-        </Link>
-        <Link className="brand compactBrand" href="/">
-          <span className="brandIcon">AI</span>
-          <span>
-            <strong>AI Insight JP</strong>
-            <small>公開判断キュー</small>
-          </span>
-        </Link>
-      </header>
+      <SiteHeader />
 
       <section className="panel candidatesPanel">
         <div className="panelHeader">
