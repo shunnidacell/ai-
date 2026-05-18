@@ -74,11 +74,6 @@ export default async function Home() {
         </div>
       </Link>
 
-      <section className="adSlot" aria-label="広告枠">
-        <span>AD</span>
-        <p>スポンサー枠 / Google AdSense想定</p>
-      </section>
-
       <section className="dashboardGrid">
         <Panel title="最新記事" icon={<Sparkles size={18} />} id="latest">
           <div className="articleList">
@@ -142,6 +137,11 @@ export default async function Home() {
             ))}
           </div>
         </Panel>
+      </section>
+
+      <section className="adSlot" aria-label="広告枠">
+        <span>AD</span>
+        <p>スポンサー枠 / Google AdSense想定</p>
       </section>
     </main>
   );
