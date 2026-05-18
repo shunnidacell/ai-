@@ -181,9 +181,19 @@ button {
   isolation: isolate;
 }
 
-.heroImage {
-  object-fit: cover;
+.heroFixedBg,
+.articleHeroFixedBg {
+  position: absolute;
+  inset: 0;
   z-index: -2;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  transform: translateZ(0);
+}
+
+.heroFixedBg {
+  background-attachment: fixed;
 }
 
 .heroOverlay {
@@ -710,6 +720,7 @@ h1 {
 
 .articleHero {
   position: relative;
+  isolation: isolate;
   min-height: 420px;
   overflow: hidden;
   border: 1px solid rgba(80, 133, 230, 0.62);
@@ -717,8 +728,8 @@ h1 {
   background: #07101f;
 }
 
-.articleHero img {
-  object-fit: cover;
+.articleHeroFixedBg {
+  background-attachment: fixed;
 }
 
 .articleHeroOverlay {

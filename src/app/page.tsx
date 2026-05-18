@@ -65,13 +65,10 @@ export default async function Home() {
       </header>
 
       <Link className="heroCard hasHeroImage" href={hero.href}>
-        <Image
-          className="heroImage"
-          src={hero.image}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
+        <div
+          aria-hidden="true"
+          className="heroFixedBg"
+          style={{ backgroundImage: `url(${hero.image})` }}
         />
         <div className="heroOverlay" />
         <div className="heroContent">

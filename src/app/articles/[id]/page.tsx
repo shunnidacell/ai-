@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, MessageSquareQuote, Sparkles } from "lucide-react";
@@ -43,12 +42,10 @@ export default async function ArticlePage({
 
       <article className="articleLayout">
         <section className="articleHero">
-          <Image
-            src={getCandidateImage(candidate)}
-            alt=""
-            fill
-            priority
-            sizes="100vw"
+          <div
+            aria-hidden="true"
+            className="articleHeroFixedBg"
+            style={{ backgroundImage: `url(${getCandidateImage(candidate)})` }}
           />
           <div className="articleHeroOverlay" />
           <div className="articleHeroText">
@@ -117,7 +114,11 @@ function PublishedArticle({
 
       <article className="articleLayout">
         <section className="articleHero">
-          <Image src={article.image} alt="" fill priority sizes="100vw" />
+          <div
+            aria-hidden="true"
+            className="articleHeroFixedBg"
+            style={{ backgroundImage: `url(${article.image})` }}
+          />
           <div className="articleHeroOverlay" />
           <div className="articleHeroText">
             <span className="badge">{article.category}</span>
