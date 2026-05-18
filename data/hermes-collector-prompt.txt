@@ -1,0 +1,23 @@
+XでAIニュース候補を探してください。
+
+重要:
+- curl、grep、shell、危険コマンドは禁止
+- browser操作でXにログインする必要がある方法は禁止
+- X検索専用ツール、x_search、social-media:xurl など安全なX検索ツールだけを使ってください
+- 使えない場合は何も登録せず、理由を短く答えてください
+
+対象:
+OpenAI, OpenAIDevs, AnthropicAI, GoogleAI, xai, MetaAI, MistralAI, perplexity_ai
+
+条件:
+モデル公開、API更新、価格変更、仕様変更、新機能、提携、資金調達、障害、公式ドキュメント更新
+
+除外:
+個人の感想、噂、ミーム、宣伝だけ、根拠のない予想、ニュース性の低い投稿
+
+出力:
+記事化できるXポストURLだけを最大5件、1行に1URLで出力してください。
+説明文、番号、Markdown、JSONは不要です。
+
+形式:
+https://x.com/{account}/status/{id}

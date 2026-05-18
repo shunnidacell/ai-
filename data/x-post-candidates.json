@@ -1,0 +1,81 @@
+[
+  {
+    "id": "perplexity_ai-2011484983391559697",
+    "url": "https://x.com/perplexity_ai/status/2011484983391559697",
+    "author": "perplexity_ai",
+    "statusId": "2011484983391559697",
+    "articleWorthy": true,
+    "reason": "Official account post. Ready for article review.",
+    "sourceType": "official",
+    "createdAt": "2026-05-18T08:46:39.911Z",
+    "decision": "headline",
+    "decidedAt": "2026-05-18T09:18:57.845Z"
+  },
+  {
+    "id": "AnthropicAI-1952768437559644644",
+    "url": "https://x.com/AnthropicAI/status/1952768437559644644",
+    "author": "AnthropicAI",
+    "statusId": "1952768437559644644",
+    "articleWorthy": true,
+    "reason": "Official account post. Ready for article review.",
+    "sourceType": "official",
+    "createdAt": "2026-05-18T08:46:39.911Z",
+    "decision": "draft"
+  },
+  {
+    "id": "AnthropicAI-1949908055526621302",
+    "url": "https://x.com/AnthropicAI/status/1949908055526621302",
+    "author": "AnthropicAI",
+    "statusId": "1949908055526621302",
+    "articleWorthy": true,
+    "reason": "Official account post. Ready for article review.",
+    "sourceType": "official",
+    "createdAt": "2026-05-18T08:46:39.910Z",
+    "decision": "draft"
+  },
+  {
+    "id": "claudeai-2044095089203655099",
+    "url": "https://x.com/claudeai/status/2044095089203655099",
+    "author": "claudeai",
+    "statusId": "2044095089203655099",
+    "articleWorthy": true,
+    "reason": "Official account post. Ready for article review.",
+    "sourceType": "official",
+    "createdAt": "2026-05-18T08:46:39.909Z",
+    "decision": "draft"
+  },
+  {
+    "id": "GoogleAI-2036836242076188816",
+    "url": "https://x.com/GoogleAI/status/2036836242076188816",
+    "author": "GoogleAI",
+    "statusId": "2036836242076188816",
+    "articleWorthy": true,
+    "reason": "Official account post. Ready for article review.",
+    "sourceType": "official",
+    "createdAt": "2026-05-18T08:46:39.908Z",
+    "decision": "headline",
+    "decidedAt": "2026-05-18T09:16:57.330Z"
+  },
+  {
+    "id": "AnthropicAI-2021397952791707696",
+    "url": "https://x.com/AnthropicAI/status/2021397952791707696",
+    "author": "AnthropicAI",
+    "statusId": "2021397952791707696",
+    "articleWorthy": true,
+    "reason": "Official account post. Ready for article review.",
+    "sourceType": "official",
+    "createdAt": "2026-05-18T08:46:39.907Z",
+    "decision": "draft"
+  },
+  {
+    "id": "AnthropicAI-2025997928242811253",
+    "url": "https://x.com/AnthropicAI/status/2025997928242811253",
+    "author": "AnthropicAI",
+    "statusId": "2025997928242811253",
+    "articleWorthy": true,
+    "reason": "Official account post. Ready for article review.",
+    "sourceType": "official",
+    "createdAt": "2026-05-18T08:46:39.906Z",
+    "decision": "draft"
+  }
+]
