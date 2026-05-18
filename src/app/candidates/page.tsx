@@ -59,6 +59,10 @@ export default async function CandidatesPage() {
 
                     <div className="candidateActions">
                       <CandidateDecisionButtons
+                        allowHeadline={
+                          candidate.sourceType === "official" ||
+                          candidate.sourceType === "developer"
+                        }
                         current={candidate.decision}
                         id={candidate.id}
                       />

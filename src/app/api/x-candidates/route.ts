@@ -89,6 +89,27 @@ export async function PATCH(request: Request) {
       );
     }
 
+    const candidates = await readCandidates();
+    const candidate = candidates.find((item) => item.id === body.id);
+
+    if (!candidate) {
+      return NextResponse.json(
+        { error: "候補が見つかりません。" },
+        { status: 404 },
+      );
+    }
+
+    if (
+      body.decision === "headline" &&
+      candidate.sourceType !== "official" &&
+      candidate.sourceType !== "developer"
+    ) {
+      return NextResponse.json(
+        { error: "見出しは大きなニュース・公式一次情報だけに使います。" },
+        { status: 400 },
+      );
+    }
+
     return NextResponse.json(
       await updateCandidateDecision(body.id, body.decision),
     );

@@ -168,8 +168,9 @@ export function classifyCandidate(author: string) {
   }
 
   return {
-    articleWorthy: false,
-    reason: "Unknown account. Needs manual review before article creation.",
+    articleWorthy: true,
+    reason:
+      "Individual or unknown account. Review as a practical Japanese AI post before publishing.",
     sourceType: "unknown" as const,
   };
 }

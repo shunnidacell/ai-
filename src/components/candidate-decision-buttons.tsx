@@ -10,9 +10,11 @@ const actions: Array<{ decision: CandidateDecision; label: string }> = [
 ];
 
 export function CandidateDecisionButtons({
+  allowHeadline,
   current,
   id,
 }: {
+  allowHeadline: boolean;
   current?: CandidateDecision;
   id: string;
 }) {
@@ -30,17 +32,27 @@ export function CandidateDecisionButtons({
 
   return (
     <div className="decisionButtons">
-      {actions.map((action) => (
-        <button
-          className={current === action.decision ? "activeDecision" : ""}
-          disabled={Boolean(busy)}
-          key={action.decision}
-          onClick={() => update(action.decision)}
-          type="button"
-        >
-          {busy === action.decision ? "更新中" : action.label}
-        </button>
-      ))}
+      {actions.map((action) => {
+        const headlineBlocked =
+          action.decision === "headline" && !allowHeadline;
+
+        return (
+          <button
+            className={current === action.decision ? "activeDecision" : ""}
+            disabled={Boolean(busy) || headlineBlocked}
+            key={action.decision}
+            onClick={() => update(action.decision)}
+            title={
+              headlineBlocked
+                ? "見出しは大きなニュース・公式一次情報だけに使います"
+                : undefined
+            }
+            type="button"
+          >
+            {busy === action.decision ? "更新中" : action.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
