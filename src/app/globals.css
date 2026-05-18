@@ -1210,6 +1210,10 @@ blockquote cite {
     padding-bottom: 6px;
   }
 
+  .simpleNav {
+    justify-content: flex-end;
+  }
+
   .headerActions {
     justify-content: space-between;
   }
@@ -1243,6 +1247,15 @@ blockquote cite {
 
   .brand strong {
     font-size: 21px;
+  }
+
+  .simpleHeader {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .simpleNav {
+    justify-content: flex-start;
   }
 
   .searchBox {
@@ -1297,6 +1310,17 @@ blockquote cite {
 
   .articleHeroText h1 {
     font-size: 27px;
+  }
+
+  .sidePager {
+    top: auto;
+    bottom: 14px;
+    padding: 11px;
+    transform: none;
+  }
+
+  .sidePager span {
+    display: none;
   }
 
   .articleBody {
