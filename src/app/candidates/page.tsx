@@ -5,7 +5,11 @@ import { CandidateDecisionButtons } from "@/components/candidate-decision-button
 import { CollectWithHermesButton } from "@/components/collect-with-hermes-button";
 import { DeleteCandidateButton } from "@/components/delete-candidate-button";
 import { XEmbed } from "@/components/x-embed";
-import { buildCandidateDraft, readCandidates } from "@/lib/x-candidates";
+import {
+  buildCandidateDraft,
+  getCandidateImage,
+  readCandidates,
+} from "@/lib/x-candidates";
 
 export const dynamic = "force-dynamic";
 
@@ -65,7 +69,7 @@ export default async function CandidatesPage() {
                   <aside className="candidateDraftPreview">
                     <div className="draftImagePreview">
                       <Image
-                        src="/ai-chip-hero.png"
+                        src={getCandidateImage(candidate)}
                         alt=""
                         fill
                         sizes="360px"
