@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { CandidateDecisionButtons } from "@/components/candidate-decision-buttons";
 import { CollectWithHermesButton } from "@/components/collect-with-hermes-button";
@@ -15,9 +16,16 @@ export const dynamic = "force-dynamic";
 
 export default async function CandidatesPage() {
   const candidates = await readCandidates();
+  const backdropCandidate = candidates[0];
+  const backdropImage = backdropCandidate
+    ? getCandidateImage(backdropCandidate)
+    : "/ai-chip-hero.png";
 
   return (
-    <main className="siteShell">
+    <main
+      className="siteShell fixedBackdropShell"
+      style={{ "--page-bg": `url(${backdropImage})` } as CSSProperties}
+    >
       <header className="articleTop">
         <Link className="backLink" href="/">
           <ArrowLeft size={18} />

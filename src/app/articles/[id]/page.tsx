@@ -39,10 +39,10 @@ export default async function ArticlePage({
 
   return (
     <main
-      className="siteShell articleBackdropShell"
+      className="siteShell fixedBackdropShell articleBackdropShell"
       style={
         {
-          "--article-bg": `url(${getCandidateImage(candidate)})`,
+          "--page-bg": `url(${getCandidateImage(candidate)})`,
         } as CSSProperties
       }
     >
@@ -118,10 +118,10 @@ function PublishedArticle({
 }) {
   return (
     <main
-      className="siteShell articleBackdropShell"
+      className="siteShell fixedBackdropShell articleBackdropShell"
       style={
         {
-          "--article-bg": `url(${article.image})`,
+          "--page-bg": `url(${article.image})`,
         } as CSSProperties
       }
     >

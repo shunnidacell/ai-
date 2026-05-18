@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { Eye, Search, Sparkles, TrendingUp } from "lucide-react";
 import { latestArticles, trends } from "@/lib/mock-data";
 import {
@@ -41,7 +42,10 @@ export default async function Home() {
       };
 
   return (
-    <main className="siteShell">
+    <main
+      className="siteShell fixedBackdropShell"
+      style={{ "--page-bg": `url(${hero.image})` } as CSSProperties}
+    >
       <header className="siteHeader">
         <Link className="brand" href="/">
           <span className="brandIcon">AI</span>
