@@ -1224,6 +1224,27 @@ h1 {
   background: rgba(5, 10, 19, 0.5);
 }
 
+.heroAdminActions {
+  position: absolute;
+  right: 26px;
+  bottom: 24px;
+  z-index: 2;
+  display: grid;
+  gap: 10px;
+  width: min(360px, calc(100% - 52px));
+  border: 1px solid rgba(111, 146, 210, 0.22);
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(5, 10, 19, 0.68);
+  backdrop-filter: blur(18px);
+}
+
+.fixedArticleNote {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .emptyPublicPanel {
   padding: 24px;
 }
