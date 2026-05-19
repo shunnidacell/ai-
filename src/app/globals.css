@@ -63,6 +63,13 @@ button {
   width: min(1500px, calc(100% - 72px));
 }
 
+.articleIndexShell {
+  min-height: 100svh;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(155, 96, 255, 0.14), transparent 24%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03), transparent 18%, transparent 82%, rgba(255, 255, 255, 0.03));
+}
+
 .fixedBackdropShell {
   isolation: isolate;
 }
@@ -576,6 +583,127 @@ h1 {
   color: #c7d6ee;
   font-size: 12px;
   font-weight: 900;
+}
+
+.homeContentLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 42px;
+  align-items: start;
+  margin-top: 42px;
+}
+
+.homeArticleGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 54px 22px;
+}
+
+.homeArticleCard {
+  display: block;
+  min-width: 0;
+}
+
+.homeArticleCard:hover h2 {
+  color: #9bc3ff;
+}
+
+.homeArticleImage {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border: 1px solid rgba(111, 146, 210, 0.22);
+  background: rgba(8, 16, 29, 0.78);
+}
+
+.homeArticleImage img {
+  object-fit: cover;
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.homeArticleCard:hover .homeArticleImage img {
+  filter: saturate(1.08);
+  transform: scale(1.03);
+}
+
+.homeArticleImage span {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  padding: 5px 10px;
+  background: linear-gradient(135deg, rgba(163, 96, 255, 0.92), rgba(96, 136, 255, 0.9));
+  color: white;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.homeArticleCard h2 {
+  margin-top: 14px;
+  color: #f5f7fb;
+  font-size: 17px;
+  line-height: 1.55;
+  letter-spacing: 0;
+  transition: color 160ms ease;
+}
+
+.homeArticleCard p {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 9px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.homeArticleCard p span {
+  color: #b694ff;
+  font-size: 11px;
+}
+
+.sponsorRail {
+  position: sticky;
+  top: 24px;
+  min-height: 620px;
+  padding: 0 6px;
+  background:
+    radial-gradient(circle at 50% 44%, rgba(255, 255, 255, 0.16), transparent 16%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+}
+
+.sponsorRail h2 {
+  color: #f6f7fb;
+  font-size: 16px;
+  letter-spacing: 0;
+}
+
+.sponsorDivider {
+  height: 1px;
+  margin: 14px 0 24px;
+  background: linear-gradient(90deg, rgba(184, 116, 255, 0.74), transparent);
+}
+
+.sponsorBanner {
+  display: grid;
+  min-height: 136px;
+  place-items: center;
+  border: 1px solid rgba(111, 146, 210, 0.3);
+  background:
+    linear-gradient(135deg, rgba(3, 9, 20, 0.94), rgba(13, 31, 52, 0.88)),
+    rgba(8, 16, 29, 0.9);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+  text-align: center;
+}
+
+.sponsorBanner span {
+  font-size: 30px;
+  font-weight: 900;
+}
+
+.sponsorBanner small {
+  margin-top: -24px;
+  color: #9fb0c9;
+  font-size: 12px;
 }
 
 .dashboardGrid {
@@ -1251,6 +1379,19 @@ blockquote cite {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .homeContentLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .homeArticleGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sponsorRail {
+    position: static;
+    min-height: auto;
+  }
+
   .dashboardGrid {
     grid-template-columns: 1fr;
   }
@@ -1362,6 +1503,20 @@ blockquote cite {
 
   .officialGrid {
     grid-template-columns: 1fr;
+  }
+
+  .homeContentLayout {
+    gap: 28px;
+    margin-top: 28px;
+  }
+
+  .homeArticleGrid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .homeArticleCard h2 {
+    font-size: 16px;
   }
 
   .sectionTitle {

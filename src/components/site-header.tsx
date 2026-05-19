@@ -16,10 +16,8 @@ export function SiteHeader() {
         <Link className="active" href="/">
           ホーム
         </Link>
-        <a href="#latest">最新記事</a>
-        <a href="#trend">トレンド</a>
-        <a href="#featured">人気記事</a>
-        <Link href="/contact">編集部便り</Link>
+        <Link href="/sns">SNS</Link>
+        <Link href="/contact">お問い合わせ</Link>
       </nav>
 
       <label className="searchBox">
