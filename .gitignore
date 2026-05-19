@@ -24,6 +24,7 @@
 .DS_Store
 *.pem
 .x-browser-profile/
+.codegraph/
 
 # debug
 npm-debug.log*
