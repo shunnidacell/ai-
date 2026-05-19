@@ -4,6 +4,8 @@ import type { CSSProperties } from "react";
 import { CandidateDecisionButtons } from "@/components/candidate-decision-buttons";
 import { DeleteCandidateButton } from "@/components/delete-candidate-button";
 import { SiteHeader } from "@/components/site-header";
+import { StaticArticleAdminButtons } from "@/components/static-article-admin-buttons";
+import { getVisibleStaticArticles } from "@/lib/article-visibility";
 import { latestArticles } from "@/lib/mock-data";
 import {
   buildCandidateDraft,
@@ -28,12 +30,13 @@ type AdminArticleCard = {
 
 export default async function PublishedPage() {
   const candidates = await readCandidates();
+  const visibleStaticArticles = await getVisibleStaticArticles();
   const headlineCandidate = getHeadlineCandidates(candidates)[0];
   const headlineDraft = headlineCandidate
     ? buildCandidateDraft(headlineCandidate)
     : null;
   const publicCandidates = getPublicCandidates(candidates);
-  const lead = latestArticles[0];
+  const lead = visibleStaticArticles[0] ?? latestArticles[0];
 
   const hero =
     headlineCandidate && headlineDraft
@@ -72,7 +75,7 @@ export default async function PublishedPage() {
       };
     });
 
-  const staticCards: AdminArticleCard[] = latestArticles.map((article, index) => ({
+  const staticCards: AdminArticleCard[] = visibleStaticArticles.map((article, index) => ({
     date: article.date,
     href: `/articles/${article.id}`,
     id: article.id,
@@ -169,7 +172,7 @@ export default async function PublishedPage() {
                   <DeleteCandidateButton id={article.candidate.id} />
                 </div>
               ) : (
-                <p className="fixedArticleNote">固定記事はこの画面では削除しません。</p>
+                <StaticArticleAdminButtons id={article.id} />
               )}
             </article>
           ))}

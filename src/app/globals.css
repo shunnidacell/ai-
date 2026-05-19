@@ -1245,6 +1245,28 @@ h1 {
   font-size: 12px;
 }
 
+.staticArticleAdminButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.staticArticleAdminButtons button {
+  border: 1px solid rgba(111, 146, 210, 0.24);
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(9, 16, 31, 0.84);
+  color: #dbe7fb;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.staticArticleAdminButtons button:last-child {
+  border-color: rgba(248, 113, 113, 0.4);
+  color: #fecaca;
+}
+
 .emptyPublicPanel {
   padding: 24px;
 }

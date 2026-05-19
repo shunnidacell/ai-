@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { SiteHeader } from "@/components/site-header";
-import { latestArticles } from "@/lib/mock-data";
+import { getVisibleStaticArticles } from "@/lib/article-visibility";
 import {
   buildCandidateDraft,
   getHeadlineCandidates,
@@ -23,13 +23,18 @@ type HomeArticle = {
 };
 
 export default async function Home() {
+  const visibleStaticArticles = await getVisibleStaticArticles();
   const candidates = await readCandidates();
   const headlineCandidates = getHeadlineCandidates(candidates);
   const headlineCandidate = headlineCandidates[0];
   const headlineDraft = headlineCandidate
     ? buildCandidateDraft(headlineCandidate)
     : null;
-  const lead = latestArticles[0];
+  const lead = visibleStaticArticles[0];
+
+  if (!lead) {
+    throw new Error("表示できる記事がありません。");
+  }
 
   const hero =
     headlineCandidate && headlineDraft
@@ -68,7 +73,7 @@ export default async function Home() {
 
   const articleCards: HomeArticle[] = [
     ...publishedCandidateCards,
-    ...latestArticles.map((article, index) => ({
+    ...visibleStaticArticles.map((article, index) => ({
       id: article.id,
       title: article.title,
       date: article.date,
