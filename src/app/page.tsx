@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { latestArticles } from "@/lib/mock-data";
 import {
@@ -27,34 +28,69 @@ export default async function Home() {
   const headlineDraft = headlineCandidate
     ? buildCandidateDraft(headlineCandidate)
     : null;
+  const lead = latestArticles[0];
 
-  const headlineArticle: HomeArticle | null =
+  const hero =
     headlineCandidate && headlineDraft
       ? {
-          id: headlineCandidate.id,
-          title: headlineDraft.title,
+          category: "注目記事",
           date: "候補管理から選択",
+          excerpt: headlineDraft.summary,
+          href: `/articles/${headlineCandidate.id}`,
           image: getCandidateImage(headlineCandidate),
           source: headlineCandidate.author,
-          label: "注目",
+          title: headlineDraft.title,
         }
-      : null;
+      : {
+          category: "注目記事",
+          date: lead.date,
+          excerpt: lead.excerpt,
+          href: `/articles/${lead.id}`,
+          image: lead.image,
+          source: lead.source,
+          title: lead.title,
+        };
 
-  const articleCards: HomeArticle[] = [
-    ...(headlineArticle ? [headlineArticle] : []),
-    ...latestArticles.map((article, index) => ({
-      id: article.id,
-      title: article.title,
-      date: article.date,
-      image: article.image,
-      source: article.source,
-      label: index === 0 ? "最新" : article.category,
-    })),
-  ];
+  const articleCards: HomeArticle[] = latestArticles.map((article, index) => ({
+    id: article.id,
+    title: article.title,
+    date: article.date,
+    image: article.image,
+    source: article.source,
+    label: index === 0 ? "最新" : article.category,
+  }));
 
   return (
-    <main className="siteShell homeShell articleIndexShell">
+    <main
+      className="siteShell fixedBackdropShell homeShell articleIndexShell"
+      style={{ "--page-bg": `url(${hero.image})` } as CSSProperties}
+    >
       <SiteHeader />
+
+      <Link className="heroCard hasHeroImage" href={hero.href}>
+        <div
+          aria-hidden="true"
+          className="heroFixedBg"
+          style={{ backgroundImage: `url(${hero.image})` }}
+        />
+        <div className="heroOverlay" />
+        <div className="heroContent">
+          <span className="badge">{hero.category}</span>
+          <h1>{hero.title}</h1>
+          <p>{hero.excerpt}</p>
+          <p className="sourceLine">
+            <span className="sourceAvatar">{hero.source.slice(0, 1)}</span>
+            {hero.source} ・ {hero.date} ・ AIニュース
+          </p>
+          <span className="heroCta">続きを読む</span>
+        </div>
+        <div className="sliderDots" aria-hidden="true">
+          <span className="current" />
+          <span />
+          <span />
+          <span />
+        </div>
+      </Link>
 
       <div className="homeContentLayout">
         <section className="homeArticleGrid" aria-label="記事一覧">

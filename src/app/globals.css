@@ -84,7 +84,10 @@ button {
   background-position: center top;
   background-repeat: no-repeat;
   background-size: cover;
+  background-attachment: fixed;
   content: "";
+  filter: blur(10px) saturate(1.08);
+  transform: scale(1.04);
 }
 
 .fixedBackdropShell::after {
@@ -590,7 +593,7 @@ h1 {
   grid-template-columns: minmax(0, 1fr) 330px;
   gap: 42px;
   align-items: start;
-  margin-top: 42px;
+  margin-top: 54px;
 }
 
 .homeArticleGrid {
@@ -664,7 +667,7 @@ h1 {
 .sponsorRail {
   position: sticky;
   top: 24px;
-  min-height: 620px;
+  min-height: 700px;
   padding: 0 6px;
   background:
     radial-gradient(circle at 50% 44%, rgba(255, 255, 255, 0.16), transparent 16%),
@@ -685,7 +688,7 @@ h1 {
 
 .sponsorBanner {
   display: grid;
-  min-height: 136px;
+  min-height: 188px;
   place-items: center;
   border: 1px solid rgba(111, 146, 210, 0.3);
   background:
