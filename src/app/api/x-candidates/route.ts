@@ -4,6 +4,7 @@ import {
   deleteCandidate,
   readCandidates,
   registerCandidate,
+  updateCandidateDraft,
   updateCandidateDecision,
 } from "@/lib/x-candidates";
 
@@ -73,16 +74,27 @@ export async function PATCH(request: Request) {
     const body = (await request.json()) as {
       id?: string;
       decision?: CandidateDecision;
+      draft?: {
+        body?: string;
+        imageOverride?: string;
+        imagePrompt?: string;
+        summary?: string;
+        title?: string;
+        translation?: string;
+      };
     };
 
-    if (!body.id || !body.decision) {
+    if (!body.id || (!body.decision && !body.draft)) {
       return NextResponse.json(
-        { error: "id と decision を指定してください。" },
+        { error: "id と更新内容を指定してください。" },
         { status: 400 },
       );
     }
 
-    if (!["draft", "published", "headline", "rejected"].includes(body.decision)) {
+    if (
+      body.decision &&
+      !["draft", "published", "headline", "rejected"].includes(body.decision)
+    ) {
       return NextResponse.json(
         { error: "decision が不正です。" },
         { status: 400 },
@@ -96,6 +108,17 @@ export async function PATCH(request: Request) {
       return NextResponse.json(
         { error: "候補が見つかりません。" },
         { status: 404 },
+      );
+    }
+
+    if (body.draft) {
+      return NextResponse.json(await updateCandidateDraft(body.id, body.draft));
+    }
+
+    if (!body.decision) {
+      return NextResponse.json(
+        { error: "decision を指定してください。" },
+        { status: 400 },
       );
     }
 

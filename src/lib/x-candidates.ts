@@ -14,6 +14,12 @@ export type XPostCandidate = {
   createdAt: string;
   decision?: CandidateDecision;
   decidedAt?: string;
+  draftTitle?: string;
+  draftTranslation?: string;
+  draftSummary?: string;
+  draftBody?: string[];
+  draftImagePrompt?: string;
+  imageOverride?: string;
 };
 
 export type CandidateDraft = {
@@ -201,7 +207,7 @@ export function classifyCandidate(author: string) {
 }
 
 export function buildCandidateDraft(candidate: XPostCandidate): CandidateDraft {
-  return (
+  const draft =
     knownDrafts[candidate.statusId] ?? {
       title: `${candidate.author}の公式ポストを確認`,
       translation:
@@ -214,12 +220,20 @@ export function buildCandidateDraft(candidate: XPostCandidate): CandidateDraft {
       ],
       imagePrompt:
         "Dark editorial hero image for AI industry news, no text, no logos.",
-    }
-  );
+    };
+
+  return {
+    ...draft,
+    body: candidate.draftBody?.length ? candidate.draftBody : draft.body,
+    imagePrompt: candidate.draftImagePrompt ?? draft.imagePrompt,
+    summary: candidate.draftSummary ?? draft.summary,
+    title: candidate.draftTitle ?? draft.title,
+    translation: candidate.draftTranslation ?? draft.translation,
+  };
 }
 
 export function getCandidateImage(candidate: XPostCandidate) {
-  return knownImages[candidate.statusId] ?? "/ai-chip-hero.png";
+  return candidate.imageOverride ?? knownImages[candidate.statusId] ?? "/ai-chip-hero.png";
 }
 
 export async function registerCandidate(inputUrl: string) {
@@ -275,6 +289,59 @@ export async function updateCandidateDecision(
         : candidate,
     );
   }
+
+  await writeCandidates(next);
+  return { candidates: next };
+}
+
+export async function updateCandidateDraft(
+  id: string,
+  draft: {
+    body?: string;
+    imageOverride?: string;
+    imagePrompt?: string;
+    summary?: string;
+    title?: string;
+    translation?: string;
+  },
+) {
+  const candidates = await readCandidates();
+  const next = candidates.map((candidate) => {
+    if (candidate.id !== id) {
+      return candidate;
+    }
+
+    return {
+      ...candidate,
+      draftBody:
+        draft.body === undefined
+          ? candidate.draftBody
+          : draft.body
+              .split(/\n{2,}/)
+              .map((paragraph) => paragraph.trim())
+              .filter(Boolean),
+      draftImagePrompt:
+        draft.imagePrompt === undefined
+          ? candidate.draftImagePrompt
+          : draft.imagePrompt.trim() || undefined,
+      draftSummary:
+        draft.summary === undefined
+          ? candidate.draftSummary
+          : draft.summary.trim() || undefined,
+      draftTitle:
+        draft.title === undefined
+          ? candidate.draftTitle
+          : draft.title.trim() || undefined,
+      draftTranslation:
+        draft.translation === undefined
+          ? candidate.draftTranslation
+          : draft.translation.trim() || undefined,
+      imageOverride:
+        draft.imageOverride === undefined
+          ? candidate.imageOverride
+          : draft.imageOverride.trim() || undefined,
+    };
+  });
 
   await writeCandidates(next);
   return { candidates: next };

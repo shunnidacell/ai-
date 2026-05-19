@@ -1157,6 +1157,77 @@ h1 {
   margin-top: 14px;
 }
 
+.candidateEditForm {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.candidateEditForm label {
+  display: grid;
+  gap: 6px;
+  color: #cbd6e8;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.candidateEditForm input,
+.candidateEditForm textarea {
+  width: 100%;
+  border: 1px solid rgba(111, 146, 210, 0.28);
+  border-radius: 8px;
+  padding: 10px 11px;
+  background: rgba(5, 10, 19, 0.64);
+  color: var(--text);
+  font: inherit;
+  line-height: 1.55;
+  outline: 0;
+}
+
+.candidateEditForm textarea {
+  resize: vertical;
+}
+
+.candidateEditForm button {
+  justify-self: start;
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, var(--blue), var(--violet));
+  color: white;
+  font-weight: 900;
+}
+
+.publishedAdminHead {
+  margin: 32px 0 28px;
+}
+
+.publishedAdminHead h1 {
+  max-width: none;
+  margin: 0;
+  font-size: 34px;
+}
+
+.publishedAdminHead p {
+  margin-top: 10px;
+  color: var(--muted);
+}
+
+.publishedAdminGrid {
+  margin-top: 0;
+}
+
+.publishedAdminCard {
+  border: 1px solid rgba(111, 146, 210, 0.18);
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(5, 10, 19, 0.5);
+}
+
+.emptyPublicPanel {
+  padding: 24px;
+}
+
 .candidateItem {
   display: grid;
   grid-template-columns: minmax(220px, 0.5fr) minmax(320px, 1fr);
