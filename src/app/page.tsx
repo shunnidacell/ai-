@@ -5,7 +5,9 @@ import { SiteHeader } from "@/components/site-header";
 import { latestArticles } from "@/lib/mock-data";
 import {
   buildCandidateDraft,
+  getHeadlineCandidates,
   getCandidateImage,
+  getPublicCandidates,
   readCandidates,
 } from "@/lib/x-candidates";
 
@@ -22,9 +24,8 @@ type HomeArticle = {
 
 export default async function Home() {
   const candidates = await readCandidates();
-  const headlineCandidate = candidates.find(
-    (candidate) => candidate.decision === "headline",
-  );
+  const headlineCandidates = getHeadlineCandidates(candidates);
+  const headlineCandidate = headlineCandidates[0];
   const headlineDraft = headlineCandidate
     ? buildCandidateDraft(headlineCandidate)
     : null;
@@ -51,14 +52,31 @@ export default async function Home() {
           title: lead.title,
         };
 
-  const articleCards: HomeArticle[] = latestArticles.map((article, index) => ({
-    id: article.id,
-    title: article.title,
-    date: article.date,
-    image: article.image,
-    source: article.source,
-    label: index === 0 ? "最新" : article.category,
-  }));
+  const publishedCandidateCards: HomeArticle[] = getPublicCandidates(candidates)
+    .filter((candidate) => candidate.id !== headlineCandidate?.id)
+    .map((candidate) => {
+      const draft = buildCandidateDraft(candidate);
+      return {
+        id: candidate.id,
+        title: draft.title,
+        date: formatCandidateDate(candidate.decidedAt ?? candidate.createdAt),
+        image: getCandidateImage(candidate),
+        source: candidate.author,
+        label: candidate.decision === "headline" ? "見出し" : "公開",
+      };
+    });
+
+  const articleCards: HomeArticle[] = [
+    ...publishedCandidateCards,
+    ...latestArticles.map((article, index) => ({
+      id: article.id,
+      title: article.title,
+      date: article.date,
+      image: article.image,
+      source: article.source,
+      label: index === 0 ? "最新" : article.category,
+    })),
+  ];
 
   return (
     <main
@@ -129,4 +147,12 @@ export default async function Home() {
       </div>
     </main>
   );
+}
+
+function formatCandidateDate(value: string) {
+  return new Intl.DateTimeFormat("ja-JP", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(value));
 }

@@ -667,7 +667,7 @@ h1 {
 .sponsorRail {
   position: sticky;
   top: 24px;
-  min-height: 700px;
+  min-height: 520px;
   padding: 0 6px;
   background:
     radial-gradient(circle at 50% 44%, rgba(255, 255, 255, 0.16), transparent 16%),
@@ -688,7 +688,7 @@ h1 {
 
 .sponsorBanner {
   display: grid;
-  min-height: 188px;
+  min-height: 116px;
   place-items: center;
   border: 1px solid rgba(111, 146, 210, 0.3);
   background:
@@ -699,12 +699,12 @@ h1 {
 }
 
 .sponsorBanner span {
-  font-size: 30px;
+  font-size: 24px;
   font-weight: 900;
 }
 
 .sponsorBanner small {
-  margin-top: -24px;
+  margin-top: -18px;
   color: #9fb0c9;
   font-size: 12px;
 }
@@ -1114,6 +1114,49 @@ h1 {
   padding: 16px;
 }
 
+.publicArticlesPanel {
+  margin-top: 24px;
+}
+
+.publicArticlesPanel .panelHeader p {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.candidatePublicGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  padding: 18px;
+}
+
+.candidatePublicCard {
+  min-width: 0;
+  border: 1px solid rgba(111, 146, 210, 0.22);
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(7, 13, 25, 0.68);
+}
+
+.candidatePublicCard h2 {
+  margin-top: 12px;
+  color: #f5f7fb;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.candidatePublicCard p {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.candidatePublicActions {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
 .candidateItem {
   display: grid;
   grid-template-columns: minmax(220px, 0.5fr) minmax(320px, 1fr);
@@ -1390,6 +1433,10 @@ blockquote cite {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .candidatePublicGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .sponsorRail {
     position: static;
     min-height: auto;
@@ -1516,6 +1563,10 @@ blockquote cite {
   .homeArticleGrid {
     grid-template-columns: 1fr;
     gap: 30px;
+  }
+
+  .candidatePublicGrid {
+    grid-template-columns: 1fr;
   }
 
   .homeArticleCard h2 {

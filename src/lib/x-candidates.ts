@@ -126,6 +126,31 @@ export async function writeCandidates(candidates: XPostCandidate[]) {
   await fs.writeFile(storePath, JSON.stringify(candidates, null, 2), "utf8");
 }
 
+export function getCandidateTimestamp(candidate: XPostCandidate) {
+  return Date.parse(candidate.decidedAt ?? candidate.createdAt);
+}
+
+export function sortCandidatesByNewest<T extends XPostCandidate>(candidates: T[]) {
+  return [...candidates].sort(
+    (a, b) => getCandidateTimestamp(b) - getCandidateTimestamp(a),
+  );
+}
+
+export function getPublicCandidates(candidates: XPostCandidate[]) {
+  return sortCandidatesByNewest(
+    candidates.filter(
+      (candidate) =>
+        candidate.decision === "published" || candidate.decision === "headline",
+    ),
+  );
+}
+
+export function getHeadlineCandidates(candidates: XPostCandidate[]) {
+  return sortCandidatesByNewest(
+    candidates.filter((candidate) => candidate.decision === "headline"),
+  ).slice(0, 5);
+}
+
 export function parseXPostUrl(input: string) {
   const url = new URL(input);
   const host = url.hostname.replace(/^www\./, "");
@@ -230,11 +255,27 @@ export async function updateCandidateDecision(
   decision: CandidateDecision,
 ) {
   const candidates = await readCandidates();
-  const next = candidates.map((candidate) =>
+  const decidedAt = new Date().toISOString();
+  let next = candidates.map((candidate) =>
     candidate.id === id
-      ? { ...candidate, decision, decidedAt: new Date().toISOString() }
+      ? { ...candidate, decision, decidedAt }
       : candidate,
   );
+
+  if (decision === "headline") {
+    const headlines = sortCandidatesByNewest(
+      next.filter((candidate) => candidate.decision === "headline"),
+    );
+    const overflowHeadlines = headlines.slice(5);
+    const overflowIds = new Set(overflowHeadlines.map((candidate) => candidate.id));
+
+    next = next.map((candidate) =>
+      overflowIds.has(candidate.id)
+        ? { ...candidate, decision: "published" as const }
+        : candidate,
+    );
+  }
+
   await writeCandidates(next);
   return { candidates: next };
 }
