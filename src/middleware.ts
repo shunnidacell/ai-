@@ -4,6 +4,7 @@ const protectedPaths = [
   "/candidates",
   "/published",
   "/api/articles/visibility",
+  "/api/site-pages",
   "/api/x-candidates",
   "/api/hermes",
 ];
@@ -47,6 +48,7 @@ export const config = {
     "/candidates/:path*",
     "/published/:path*",
     "/api/articles/visibility/:path*",
+    "/api/site-pages/:path*",
     "/api/x-candidates/:path*",
     "/api/hermes/:path*",
   ],

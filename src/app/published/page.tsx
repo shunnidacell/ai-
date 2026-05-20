@@ -45,7 +45,7 @@ export default async function PublishedPage() {
           category: "注目記事",
           date: "候補管理から選択",
           excerpt: headlineDraft.summary,
-          href: `/articles/${headlineCandidate.id}`,
+          href: `/published/articles/${headlineCandidate.id}`,
           image: getCandidateImage(headlineCandidate),
           source: headlineCandidate.author,
           title: headlineDraft.title,
@@ -54,7 +54,7 @@ export default async function PublishedPage() {
           category: "注目記事",
           date: lead.date,
           excerpt: lead.excerpt,
-          href: `/articles/${lead.id}`,
+          href: `/published/articles/${lead.id}`,
           image: lead.image,
           source: lead.source,
           title: lead.title,
@@ -67,7 +67,7 @@ export default async function PublishedPage() {
       return {
         candidate,
         date: formatCandidateDate(candidate.decidedAt ?? candidate.createdAt),
-        href: `/articles/${candidate.id}`,
+        href: `/published/articles/${candidate.id}`,
         id: candidate.id,
         image: getCandidateImage(candidate),
         label: candidate.decision === "headline" ? "見出し" : "公開",
@@ -77,7 +77,7 @@ export default async function PublishedPage() {
 
   const staticCards: AdminArticleCard[] = visibleStaticArticles.map((article, index) => ({
     date: article.date,
-    href: `/articles/${article.id}`,
+    href: `/published/articles/${article.id}`,
     id: article.id,
     image: article.image,
     label: index === 0 ? "固定記事" : article.category,
@@ -91,7 +91,7 @@ export default async function PublishedPage() {
       className="siteShell fixedBackdropShell homeShell articleIndexShell"
       style={{ "--page-bg": `url(${hero.image})` } as CSSProperties}
     >
-      <SiteHeader />
+      <SiteHeader admin />
 
       <section className="heroCard hasHeroImage">
         <div

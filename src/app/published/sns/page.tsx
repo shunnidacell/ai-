@@ -1,8 +1,9 @@
 import type { CSSProperties } from "react";
 import { SiteHeader } from "@/components/site-header";
+import { SitePageEditForm } from "@/components/site-page-edit-form";
 import { readSitePages } from "@/lib/site-pages";
 
-export default async function SnsPage() {
+export default async function PublishedSnsAdminPage() {
   const pages = await readSitePages();
   const page = pages.sns;
 
@@ -11,14 +12,11 @@ export default async function SnsPage() {
       className="siteShell fixedBackdropShell"
       style={{ "--page-bg": 'url("/ai-chip-hero.png")' } as CSSProperties}
     >
-      <SiteHeader />
-      <section className="simplePagePanel">
-        <span className="badge">SNS</span>
-        <h1>{page.title}</h1>
-        <p>{page.body}</p>
-        <a href={page.linkHref} rel="noreferrer" target="_blank">
-          {page.linkText}
-        </a>
+      <SiteHeader admin />
+      <section className="simplePagePanel adminSimpleEditor">
+        <span className="badge">SNS編集</span>
+        <h1>SNSページ編集</h1>
+        <SitePageEditForm pageKey="sns" {...page} />
       </section>
     </main>
   );

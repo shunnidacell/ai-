@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
 
-export function SiteHeader() {
+export function SiteHeader({ admin = false }: { admin?: boolean }) {
+  const homeHref = admin ? "/published" : "/";
+  const snsHref = admin ? "/published/sns" : "/sns";
+  const contactHref = admin ? "/published/contact" : "/contact";
+
   return (
     <header className="siteHeader">
-      <Link className="brand" href="/">
+      <Link className="brand" href={homeHref}>
         <span className="brandIcon">AI</span>
         <span>
           <strong>AI Insight JP</strong>
@@ -13,11 +17,11 @@ export function SiteHeader() {
       </Link>
 
       <nav className="navLinks" aria-label="メインメニュー">
-        <Link className="active" href="/">
+        <Link className="active" href={homeHref}>
           ホーム
         </Link>
-        <Link href="/sns">SNS</Link>
-        <Link href="/contact">お問い合わせ</Link>
+        <Link href={snsHref}>SNS</Link>
+        <Link href={contactHref}>お問い合わせ</Link>
       </nav>
 
       <label className="searchBox">
