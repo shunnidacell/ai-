@@ -1,5 +1,6 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { readJsonFromDb, writeJsonToDb } from "@/lib/db-store";
 
 export type EditablePageKey = "contact" | "sns";
 
@@ -13,6 +14,7 @@ type EditablePage = {
 type SitePages = Record<EditablePageKey, EditablePage>;
 
 const storePath = path.join(process.cwd(), "data", "site-pages.json");
+const storeKey = "site-pages";
 
 const defaults: SitePages = {
   contact: {
@@ -30,6 +32,12 @@ const defaults: SitePages = {
 };
 
 export async function readSitePages(): Promise<SitePages> {
+  const dbPages = await readJsonFromDb<Partial<SitePages>>(storeKey);
+
+  if (dbPages) {
+    return { ...defaults, ...dbPages };
+  }
+
   try {
     const raw = (await fs.readFile(storePath, "utf8")).replace(/^\uFEFF/, "");
     return { ...defaults, ...(JSON.parse(raw) as Partial<SitePages>) };
@@ -52,6 +60,10 @@ export async function updateSitePage(
       title: nextPage.title.trim(),
     },
   };
+  if (await writeJsonToDb(storeKey, next)) {
+    return next[key];
+  }
+
   await fs.mkdir(path.dirname(storePath), { recursive: true });
   await fs.writeFile(storePath, JSON.stringify(next, null, 2), "utf8");
   return next[key];

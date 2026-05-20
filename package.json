@@ -7,19 +7,21 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "db:migrate-json": "node scripts/migrate-json-to-db.mjs",
     "collect:x": "node scripts/collect-x-post-urls.mjs",
     "collect:x:login": "set X_KEEP_OPEN=1&& node scripts/collect-x-post-urls.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.16.0",
     "next": "16.2.6",
-    "playwright-core": "^1.57.0",
+    "pg": "^8.21.0",
     "playwright-core": "^1.60.0",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

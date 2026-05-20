@@ -1,5 +1,6 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { readJsonFromDb, writeJsonToDb } from "@/lib/db-store";
 
 export type CandidateDecision = "draft" | "published" | "headline" | "rejected";
 
@@ -51,6 +52,7 @@ const developerAccounts = new Set([
 ]);
 
 const storePath = path.join(process.cwd(), "data", "x-post-candidates.json");
+const storeKey = "x-post-candidates";
 
 const knownImages: Record<string, string> = {
   "2011484983391559697": "/article-perplexity-bluematrix.png",
@@ -119,6 +121,12 @@ const knownDrafts: Record<string, CandidateDraft> = {
 };
 
 export async function readCandidates() {
+  const dbCandidates = await readJsonFromDb<XPostCandidate[]>(storeKey);
+
+  if (dbCandidates) {
+    return dbCandidates;
+  }
+
   try {
     const raw = (await fs.readFile(storePath, "utf8")).replace(/^\uFEFF/, "");
     return JSON.parse(raw) as XPostCandidate[];
@@ -128,6 +136,10 @@ export async function readCandidates() {
 }
 
 export async function writeCandidates(candidates: XPostCandidate[]) {
+  if (await writeJsonToDb(storeKey, candidates)) {
+    return;
+  }
+
   await fs.mkdir(path.dirname(storePath), { recursive: true });
   await fs.writeFile(storePath, JSON.stringify(candidates, null, 2), "utf8");
 }

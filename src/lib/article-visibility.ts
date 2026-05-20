@@ -1,5 +1,6 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { readJsonFromDb, writeJsonToDb } from "@/lib/db-store";
 import { latestArticles } from "@/lib/mock-data";
 
 type ArticleVisibility = {
@@ -7,8 +8,17 @@ type ArticleVisibility = {
 };
 
 const storePath = path.join(process.cwd(), "data", "article-visibility.json");
+const storeKey = "article-visibility";
 
 export async function readArticleVisibility(): Promise<ArticleVisibility> {
+  const dbVisibility = await readJsonFromDb<Partial<ArticleVisibility>>(storeKey);
+
+  if (dbVisibility) {
+    return {
+      hiddenArticleIds: dbVisibility.hiddenArticleIds ?? [],
+    };
+  }
+
   try {
     const raw = (await fs.readFile(storePath, "utf8")).replace(/^\uFEFF/, "");
     const parsed = JSON.parse(raw) as Partial<ArticleVisibility>;
@@ -21,6 +31,10 @@ export async function readArticleVisibility(): Promise<ArticleVisibility> {
 }
 
 export async function writeArticleVisibility(visibility: ArticleVisibility) {
+  if (await writeJsonToDb(storeKey, visibility)) {
+    return;
+  }
+
   await fs.mkdir(path.dirname(storePath), { recursive: true });
   await fs.writeFile(storePath, JSON.stringify(visibility, null, 2), "utf8");
 }
