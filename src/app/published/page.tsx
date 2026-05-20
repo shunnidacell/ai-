@@ -2,13 +2,18 @@ import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { CandidateDecisionButtons } from "@/components/candidate-decision-buttons";
+import { DeletedItemActions } from "@/components/deleted-item-actions";
 import { DeleteCandidateButton } from "@/components/delete-candidate-button";
 import { SiteHeader } from "@/components/site-header";
 import { StaticArticleAdminButtons } from "@/components/static-article-admin-buttons";
-import { getVisibleStaticArticles } from "@/lib/article-visibility";
+import {
+  getDeletedStaticArticles,
+  getVisibleStaticArticles,
+} from "@/lib/article-visibility";
 import { latestArticles } from "@/lib/mock-data";
 import {
   buildCandidateDraft,
+  getDeletedCandidates,
   getCandidateImage,
   getHeadlineCandidates,
   getPublicCandidates,
@@ -31,6 +36,11 @@ type AdminArticleCard = {
 export default async function PublishedPage() {
   const candidates = await readCandidates();
   const visibleStaticArticles = await getVisibleStaticArticles();
+  const deletedCandidateArticles = getDeletedCandidates(candidates).filter(
+    (candidate) =>
+      candidate.decision === "published" || candidate.decision === "headline",
+  );
+  const deletedStaticArticles = await getDeletedStaticArticles();
   const headlineCandidate = getHeadlineCandidates(candidates)[0];
   const headlineDraft = headlineCandidate
     ? buildCandidateDraft(headlineCandidate)
@@ -187,6 +197,38 @@ export default async function PublishedPage() {
           </div>
         </aside>
       </div>
+
+      <section className="panel deletedItemsPanel">
+        <div className="panelHeader">
+          <h1>削除した公開記事</h1>
+        </div>
+        <div className="deletedItemList">
+          {deletedCandidateArticles.length === 0 &&
+          deletedStaticArticles.length === 0 ? (
+            <p className="emptyState">削除した公開記事はありません。</p>
+          ) : (
+            <>
+              {deletedCandidateArticles.map((candidate) => {
+                const draft = buildCandidateDraft(candidate);
+                return (
+                  <article className="deletedItemCard" key={candidate.id}>
+                    <strong>{draft.title}</strong>
+                    <p>{candidate.author} ・ {candidate.deletedAt}</p>
+                    <DeletedItemActions id={candidate.id} type="candidate" />
+                  </article>
+                );
+              })}
+              {deletedStaticArticles.map((article) => (
+                <article className="deletedItemCard" key={article.id}>
+                  <strong>{article.title}</strong>
+                  <p>{article.source} ・ {article.date}</p>
+                  <DeletedItemActions id={article.id} type="static" />
+                </article>
+              ))}
+            </>
+          )}
+        </div>
+      </section>
     </main>
   );
 }

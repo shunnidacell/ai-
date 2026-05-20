@@ -1286,6 +1286,51 @@ h1 {
   color: #fecaca;
 }
 
+.deletedItemsPanel {
+  margin-top: 28px;
+}
+
+.deletedItemList {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.deletedItemCard {
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(111, 146, 210, 0.2);
+  border-radius: 12px;
+  padding: 14px;
+  background: rgba(5, 10, 19, 0.48);
+}
+
+.deletedItemCard p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.deletedItemActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.deletedItemActions button {
+  border: 1px solid rgba(111, 146, 210, 0.24);
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(9, 16, 31, 0.84);
+  color: #dbe7fb;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.deletedItemActions button:last-child {
+  border-color: rgba(248, 113, 113, 0.4);
+  color: #fecaca;
+}
+
 .emptyPublicPanel {
   padding: 24px;
 }

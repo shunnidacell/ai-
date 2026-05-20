@@ -5,10 +5,12 @@ import { CandidateDecisionButtons } from "@/components/candidate-decision-button
 import { CandidateEditForm } from "@/components/candidate-edit-form";
 import { CollectWithHermesButton } from "@/components/collect-with-hermes-button";
 import { DeleteCandidateButton } from "@/components/delete-candidate-button";
+import { DeletedItemActions } from "@/components/deleted-item-actions";
 import { SiteHeader } from "@/components/site-header";
 import { XEmbed } from "@/components/x-embed";
 import {
   buildCandidateDraft,
+  getDeletedCandidates,
   getCandidateImage,
   readCandidates,
   sortCandidatesByNewest,
@@ -19,9 +21,14 @@ export const dynamic = "force-dynamic";
 
 export default async function CandidatesPage() {
   const candidates = await readCandidates();
+  const deletedCandidates = getDeletedCandidates(candidates).filter(
+    (candidate) =>
+      candidate.decision !== "published" && candidate.decision !== "headline",
+  );
   const reviewCandidates = sortCandidatesByNewest(
     candidates.filter(
       (candidate) =>
+        !candidate.deletedAt &&
         candidate.decision !== "published" && candidate.decision !== "headline",
     ),
   );
@@ -76,6 +83,28 @@ export default async function CandidatesPage() {
                 <CandidateDraftPreview candidate={candidate} />
               </article>
             ))
+          )}
+        </div>
+      </section>
+
+      <section className="panel candidatesPanel deletedItemsPanel">
+        <div className="panelHeader">
+          <h1>削除した下書き</h1>
+        </div>
+        <div className="deletedItemList">
+          {deletedCandidates.length === 0 ? (
+            <p className="emptyState">削除した下書きはありません。</p>
+          ) : (
+            deletedCandidates.map((candidate) => {
+              const draft = buildCandidateDraft(candidate);
+              return (
+                <article className="deletedItemCard" key={candidate.id}>
+                  <strong>{draft.title}</strong>
+                  <p>{candidate.author} ・ {candidate.deletedAt}</p>
+                  <DeletedItemActions id={candidate.id} type="candidate" />
+                </article>
+              );
+            })
           )}
         </div>
       </section>

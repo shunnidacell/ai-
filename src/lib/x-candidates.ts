@@ -15,6 +15,7 @@ export type XPostCandidate = {
   createdAt: string;
   decision?: CandidateDecision;
   decidedAt?: string;
+  deletedAt?: string;
   draftTitle?: string;
   draftTranslation?: string;
   draftSummary?: string;
@@ -158,15 +159,24 @@ export function getPublicCandidates(candidates: XPostCandidate[]) {
   return sortCandidatesByNewest(
     candidates.filter(
       (candidate) =>
-        candidate.decision === "published" || candidate.decision === "headline",
+        !candidate.deletedAt &&
+        (candidate.decision === "published" || candidate.decision === "headline"),
     ),
   );
 }
 
 export function getHeadlineCandidates(candidates: XPostCandidate[]) {
   return sortCandidatesByNewest(
-    candidates.filter((candidate) => candidate.decision === "headline"),
+    candidates.filter(
+      (candidate) => !candidate.deletedAt && candidate.decision === "headline",
+    ),
   ).slice(0, 5);
+}
+
+export function getDeletedCandidates(candidates: XPostCandidate[]) {
+  return sortCandidatesByNewest(
+    candidates.filter((candidate) => Boolean(candidate.deletedAt)),
+  );
 }
 
 export function parseXPostUrl(input: string) {
@@ -361,11 +371,30 @@ export async function updateCandidateDraft(
 
 export async function deleteCandidate(id: string) {
   const candidates = await readCandidates();
-  const next = candidates.filter((candidate) => candidate.id !== id);
+  const deletedAt = new Date().toISOString();
+  const next = candidates.map((candidate) =>
+    candidate.id === id ? { ...candidate, deletedAt } : candidate,
+  );
   await writeCandidates(next);
 
   return {
-    deleted: next.length !== candidates.length,
+    deleted: next.some((candidate) => candidate.id === id && candidate.deletedAt),
     candidates: next,
   };
+}
+
+export async function restoreCandidate(id: string) {
+  const candidates = await readCandidates();
+  const next = candidates.map((candidate) =>
+    candidate.id === id ? { ...candidate, deletedAt: undefined } : candidate,
+  );
+  await writeCandidates(next);
+  return { candidates: next, restored: true };
+}
+
+export async function purgeCandidate(id: string) {
+  const candidates = await readCandidates();
+  const next = candidates.filter((candidate) => candidate.id !== id);
+  await writeCandidates(next);
+  return { candidates: next, purged: next.length !== candidates.length };
 }

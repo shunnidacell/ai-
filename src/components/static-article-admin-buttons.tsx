@@ -10,7 +10,7 @@ export function StaticArticleAdminButtons({ id }: { id: string }) {
     await fetch("/api/articles/visibility", {
       method: "PATCH",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ id }),
+      body: JSON.stringify({ action: kind, id }),
     });
     window.location.reload();
   }

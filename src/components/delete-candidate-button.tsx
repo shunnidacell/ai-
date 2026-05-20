@@ -11,7 +11,7 @@ export function DeleteCandidateButton({ id }: { id: string }) {
     await fetch("/api/x-candidates", {
       method: "DELETE",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ id }),
+      body: JSON.stringify({ action: "delete", id }),
     });
     window.location.reload();
   }

@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
-import { hideStaticArticle } from "@/lib/article-visibility";
+import {
+  hideStaticArticle,
+  purgeStaticArticle,
+  restoreStaticArticle,
+} from "@/lib/article-visibility";
 
 export async function PATCH(request: Request) {
   try {
-    const body = (await request.json()) as { id?: string };
+    const body = (await request.json()) as {
+      action?: "delete" | "hide" | "purge" | "restore";
+      id?: string;
+    };
 
     if (!body.id) {
       return NextResponse.json(
@@ -12,7 +19,17 @@ export async function PATCH(request: Request) {
       );
     }
 
-    return NextResponse.json(await hideStaticArticle(body.id));
+    if (body.action === "restore") {
+      return NextResponse.json(await restoreStaticArticle(body.id));
+    }
+
+    if (body.action === "purge") {
+      return NextResponse.json(await purgeStaticArticle(body.id));
+    }
+
+    return NextResponse.json(
+      await hideStaticArticle(body.id, body.action === "delete" ? "deleted" : "hidden"),
+    );
   } catch {
     return NextResponse.json(
       { error: "記事の表示設定更新に失敗しました。" },

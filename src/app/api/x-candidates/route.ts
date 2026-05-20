@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import {
   type CandidateDecision,
   deleteCandidate,
+  purgeCandidate,
   readCandidates,
   registerCandidate,
+  restoreCandidate,
   updateCandidateDraft,
   updateCandidateDecision,
 } from "@/lib/x-candidates";
@@ -51,13 +53,24 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const body = (await request.json()) as { id?: string };
+    const body = (await request.json()) as {
+      action?: "delete" | "purge" | "restore";
+      id?: string;
+    };
 
     if (!body.id) {
       return NextResponse.json(
         { error: "id を指定してください。" },
         { status: 400 },
       );
+    }
+
+    if (body.action === "restore") {
+      return NextResponse.json(await restoreCandidate(body.id));
+    }
+
+    if (body.action === "purge") {
+      return NextResponse.json(await purgeCandidate(body.id));
     }
 
     return NextResponse.json(await deleteCandidate(body.id));
