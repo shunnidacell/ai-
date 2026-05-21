@@ -8,7 +8,7 @@ import { DeleteCandidateButton } from "@/components/delete-candidate-button";
 import { SiteHeader } from "@/components/site-header";
 import { StaticArticleAdminButtons } from "@/components/static-article-admin-buttons";
 import { XPostCard } from "@/components/x-post-card";
-import { getVisibleStaticArticles } from "@/lib/article-visibility";
+import { latestArticles } from "@/lib/mock-data";
 import {
   buildCandidateDraft,
   getCandidateImage,
@@ -23,8 +23,7 @@ export default async function PublishedArticleAdminPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const visibleStaticArticles = await getVisibleStaticArticles();
-  const staticArticle = visibleStaticArticles.find((article) => article.id === id);
+  const staticArticle = latestArticles.find((article) => article.id === id);
 
   if (staticArticle) {
     return (
@@ -92,11 +91,7 @@ export default async function PublishedArticleAdminPage({
   }
 
   const candidates = await readCandidates();
-  const candidate = candidates.find(
-    (item) =>
-      item.id === id &&
-      (item.decision === "published" || item.decision === "headline"),
-  );
+  const candidate = candidates.find((item) => item.id === id && !item.deletedAt);
 
   if (!candidate) {
     notFound();

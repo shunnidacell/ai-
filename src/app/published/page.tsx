@@ -4,10 +4,12 @@ import type { CSSProperties } from "react";
 import { CandidateDecisionButtons } from "@/components/candidate-decision-buttons";
 import { DeletedItemActions } from "@/components/deleted-item-actions";
 import { DeleteCandidateButton } from "@/components/delete-candidate-button";
+import { HiddenStaticArticleActions } from "@/components/hidden-static-article-actions";
 import { SiteHeader } from "@/components/site-header";
 import { StaticArticleAdminButtons } from "@/components/static-article-admin-buttons";
 import {
   getDeletedStaticArticles,
+  getHiddenStaticArticles,
   getVisibleStaticArticles,
 } from "@/lib/article-visibility";
 import { latestArticles } from "@/lib/mock-data";
@@ -36,6 +38,14 @@ type AdminArticleCard = {
 export default async function PublishedPage() {
   const candidates = await readCandidates();
   const visibleStaticArticles = await getVisibleStaticArticles();
+  const hiddenCandidateArticles = candidates.filter(
+    (candidate) =>
+      !candidate.deletedAt &&
+      candidate.decidedAt &&
+      candidate.decision !== "published" &&
+      candidate.decision !== "headline",
+  );
+  const hiddenStaticArticles = await getHiddenStaticArticles();
   const deletedCandidateArticles = getDeletedCandidates(candidates).filter(
     (candidate) =>
       candidate.decision === "published" || candidate.decision === "headline",
@@ -197,6 +207,53 @@ export default async function PublishedPage() {
           </div>
         </aside>
       </div>
+
+      <section className="panel deletedItemsPanel">
+        <div className="panelHeader">
+          <h1>非公開にした記事</h1>
+        </div>
+        <div className="deletedItemList">
+          {hiddenCandidateArticles.length === 0 &&
+          hiddenStaticArticles.length === 0 ? (
+            <p className="emptyState">非公開にした記事はありません。</p>
+          ) : (
+            <>
+              {hiddenCandidateArticles.map((candidate) => {
+                const draft = buildCandidateDraft(candidate);
+                return (
+                  <article className="deletedItemCard" key={candidate.id}>
+                    <Link href={`/published/articles/${candidate.id}`}>
+                      <strong>{draft.title}</strong>
+                    </Link>
+                    <p>{candidate.author} ・ {candidate.decidedAt}</p>
+                    <div className="candidatePublicActions">
+                      <CandidateDecisionButtons
+                        allowHeadline={
+                          candidate.sourceType === "official" ||
+                          candidate.sourceType === "developer"
+                        }
+                        current={candidate.decision}
+                        id={candidate.id}
+                        mode="review"
+                      />
+                      <DeleteCandidateButton id={candidate.id} />
+                    </div>
+                  </article>
+                );
+              })}
+              {hiddenStaticArticles.map((article) => (
+                <article className="deletedItemCard" key={article.id}>
+                  <Link href={`/published/articles/${article.id}`}>
+                    <strong>{article.title}</strong>
+                  </Link>
+                  <p>{article.source} ・ {article.date}</p>
+                  <HiddenStaticArticleActions id={article.id} />
+                </article>
+              ))}
+            </>
+          )}
+        </div>
+      </section>
 
       <section className="panel deletedItemsPanel">
         <div className="panelHeader">

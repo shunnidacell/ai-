@@ -101,3 +101,12 @@ export async function getDeletedStaticArticles() {
   const deletedIds = new Set(visibility.deletedArticleIds);
   return latestArticles.filter((article) => deletedIds.has(article.id));
 }
+
+export async function getHiddenStaticArticles() {
+  const visibility = await readArticleVisibility();
+  const deletedIds = new Set(visibility.deletedArticleIds);
+  const hiddenIds = new Set(visibility.hiddenArticleIds);
+  return latestArticles.filter(
+    (article) => hiddenIds.has(article.id) && !deletedIds.has(article.id),
+  );
+}
