@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { SiteHeader } from "@/components/site-header";
+import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { getVisibleStaticArticles } from "@/lib/article-visibility";
 import {
   buildCandidateDraft,
@@ -105,7 +105,10 @@ export default async function Home() {
             <span className="sourceAvatar">{hero.source.slice(0, 1)}</span>
             {hero.source} ・ {hero.date} ・ AIニュース
           </p>
-          <span className="heroCta">続きを読む</span>
+          <span className="heroCta">記事を読む</span>
+        </div>
+        <div className="heroVisual" aria-hidden="true">
+          <Image src={hero.image} alt="" fill priority sizes="(max-width: 720px) 90vw, 48vw" />
         </div>
         <div className="sliderDots" aria-hidden="true">
           <span className="current" />
@@ -150,6 +153,7 @@ export default async function Home() {
           </div>
         </aside>
       </div>
+      <SiteFooter />
     </main>
   );
 }

@@ -5,7 +5,7 @@ import { CandidateDecisionButtons } from "@/components/candidate-decision-button
 import { DeletedItemActions } from "@/components/deleted-item-actions";
 import { DeleteCandidateButton } from "@/components/delete-candidate-button";
 import { HiddenStaticArticleActions } from "@/components/hidden-static-article-actions";
-import { SiteHeader } from "@/components/site-header";
+import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { StaticArticleAdminButtons } from "@/components/static-article-admin-buttons";
 import {
   getDeletedStaticArticles,
@@ -131,6 +131,9 @@ export default async function PublishedPage() {
           <Link className="heroCta" href={hero.href}>
             記事を見る
           </Link>
+        </div>
+        <div className="heroVisual" aria-hidden="true">
+          <Image src={hero.image} alt="" fill priority sizes="(max-width: 720px) 90vw, 48vw" />
         </div>
         {hero.candidate && (
           <div className="heroAdminActions">
@@ -286,6 +289,7 @@ export default async function PublishedPage() {
           )}
         </div>
       </section>
+      <SiteFooter admin />
     </main>
   );
 }
