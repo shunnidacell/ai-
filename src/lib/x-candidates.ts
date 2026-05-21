@@ -252,7 +252,6 @@ export function buildCandidateDraft(candidate: XPostCandidate): CandidateDraft {
 export function getCandidateImage(candidate: XPostCandidate) {
   return (
     candidate.imageOverride ??
-    candidate.postImageUrl ??
     `/api/x-candidates/${encodeURIComponent(candidate.id)}/image.svg`
   );
 }
