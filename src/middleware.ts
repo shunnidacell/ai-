@@ -11,6 +11,13 @@ const protectedPaths = [
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  if (
+    pathname.startsWith("/api/x-candidates/") &&
+    pathname.endsWith("/image.svg")
+  ) {
+    return NextResponse.next();
+  }
+
   const shouldProtect = protectedPaths.some((path) =>
     pathname.startsWith(path),
   );

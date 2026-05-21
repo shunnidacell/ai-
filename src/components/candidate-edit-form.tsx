@@ -8,10 +8,14 @@ export function CandidateEditForm({
   draft,
   id,
   image,
+  postImageUrl,
+  postText,
 }: {
   draft: CandidateDraft;
   id: string;
   image: string;
+  postImageUrl?: string;
+  postText?: string;
 }) {
   const [busy, setBusy] = useState(false);
 
@@ -27,6 +31,8 @@ export function CandidateEditForm({
           body: String(formData.get("body") ?? ""),
           imageOverride: String(formData.get("imageOverride") ?? ""),
           imagePrompt: String(formData.get("imagePrompt") ?? ""),
+          postImageUrl: String(formData.get("postImageUrl") ?? ""),
+          postText: String(formData.get("postText") ?? ""),
           summary: String(formData.get("summary") ?? ""),
           title: String(formData.get("title") ?? ""),
           translation: String(formData.get("translation") ?? ""),
@@ -44,8 +50,16 @@ export function CandidateEditForm({
         <input defaultValue={draft.title} name="title" />
       </label>
       <label>
-        画像URL
+        タイトル画像URL
         <input defaultValue={image} name="imageOverride" />
+      </label>
+      <label>
+        Xポスト画像URL
+        <input defaultValue={postImageUrl ?? ""} name="postImageUrl" />
+      </label>
+      <label>
+        Xポスト本文
+        <textarea defaultValue={postText ?? ""} name="postText" rows={4} />
       </label>
       <label>
         要約
@@ -56,7 +70,7 @@ export function CandidateEditForm({
         <textarea defaultValue={draft.translation} name="translation" rows={4} />
       </label>
       <label>
-        本文案
+        本文
         <textarea defaultValue={draft.body.join("\n\n")} name="body" rows={7} />
       </label>
       <label>

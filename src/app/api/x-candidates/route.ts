@@ -18,7 +18,12 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as { url?: string; urls?: string[] };
+    const body = (await request.json()) as {
+      postImageUrl?: string;
+      postText?: string;
+      url?: string;
+      urls?: string[];
+    };
     const urls = body.urls ?? (body.url ? [body.url] : []);
 
     if (urls.length === 0) {
@@ -31,7 +36,12 @@ export async function POST(request: Request) {
     const results = [];
 
     for (const url of urls) {
-      results.push(await registerCandidate(url));
+      results.push(
+        await registerCandidate(url, {
+          postImageUrl: body.postImageUrl,
+          postText: body.postText,
+        }),
+      );
     }
 
     return NextResponse.json({
@@ -91,6 +101,8 @@ export async function PATCH(request: Request) {
         body?: string;
         imageOverride?: string;
         imagePrompt?: string;
+        postImageUrl?: string;
+        postText?: string;
         summary?: string;
         title?: string;
         translation?: string;

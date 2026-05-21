@@ -22,6 +22,8 @@ export type XPostCandidate = {
   draftBody?: string[];
   draftImagePrompt?: string;
   imageOverride?: string;
+  postImageUrl?: string;
+  postText?: string;
 };
 
 export type CandidateDraft = {
@@ -255,10 +257,18 @@ export function buildCandidateDraft(candidate: XPostCandidate): CandidateDraft {
 }
 
 export function getCandidateImage(candidate: XPostCandidate) {
-  return candidate.imageOverride ?? knownImages[candidate.statusId] ?? "/ai-chip-hero.png";
+  return (
+    candidate.imageOverride ??
+    candidate.postImageUrl ??
+    knownImages[candidate.statusId] ??
+    `/api/x-candidates/${encodeURIComponent(candidate.id)}/image.svg`
+  );
 }
 
-export async function registerCandidate(inputUrl: string) {
+export async function registerCandidate(
+  inputUrl: string,
+  meta?: { postImageUrl?: string; postText?: string },
+) {
   const parsed = parseXPostUrl(inputUrl);
   const classification = classifyCandidate(parsed.author);
   const candidates = await readCandidates();
@@ -278,6 +288,8 @@ export async function registerCandidate(inputUrl: string) {
     decision: "draft",
     ...classification,
     createdAt: new Date().toISOString(),
+    postImageUrl: meta?.postImageUrl?.trim() || undefined,
+    postText: meta?.postText?.trim() || undefined,
   };
 
   candidates.unshift(candidate);
@@ -322,6 +334,8 @@ export async function updateCandidateDraft(
     body?: string;
     imageOverride?: string;
     imagePrompt?: string;
+    postImageUrl?: string;
+    postText?: string;
     summary?: string;
     title?: string;
     translation?: string;
@@ -362,6 +376,14 @@ export async function updateCandidateDraft(
         draft.imageOverride === undefined
           ? candidate.imageOverride
           : draft.imageOverride.trim() || undefined,
+      postImageUrl:
+        draft.postImageUrl === undefined
+          ? candidate.postImageUrl
+          : draft.postImageUrl.trim() || undefined,
+      postText:
+        draft.postText === undefined
+          ? candidate.postText
+          : draft.postText.trim() || undefined,
     };
   });
 

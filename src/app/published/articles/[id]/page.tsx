@@ -144,7 +144,13 @@ export default async function PublishedArticleAdminPage({
               <DeleteCandidateButton id={candidate.id} />
             </div>
 
-            <CandidateEditForm draft={draft} id={candidate.id} image={image} />
+            <CandidateEditForm
+              draft={draft}
+              id={candidate.id}
+              image={image}
+              postImageUrl={candidate.postImageUrl}
+              postText={candidate.postText}
+            />
 
             <div className="generatedNotice">
               <Sparkles size={16} />
