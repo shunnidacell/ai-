@@ -3,7 +3,20 @@ import path from "node:path";
 import { readJsonFromDb, writeJsonToDb } from "@/lib/db-store";
 import { latestArticles } from "@/lib/mock-data";
 
+type StaticArticle = (typeof latestArticles)[number];
+
+type StaticArticleOverride = {
+  body?: string[];
+  category?: string;
+  date?: string;
+  image?: string;
+  imageSource?: string;
+  source?: string;
+  title?: string;
+};
+
 type ArticleVisibility = {
+  articleOverrides: Record<string, StaticArticleOverride>;
   deletedArticleIds: string[];
   hiddenArticleIds: string[];
 };
@@ -16,6 +29,7 @@ export async function readArticleVisibility(): Promise<ArticleVisibility> {
 
   if (dbVisibility) {
     return {
+      articleOverrides: dbVisibility.articleOverrides ?? {},
       deletedArticleIds: dbVisibility.deletedArticleIds ?? [],
       hiddenArticleIds: dbVisibility.hiddenArticleIds ?? [],
     };
@@ -25,11 +39,12 @@ export async function readArticleVisibility(): Promise<ArticleVisibility> {
     const raw = (await fs.readFile(storePath, "utf8")).replace(/^\uFEFF/, "");
     const parsed = JSON.parse(raw) as Partial<ArticleVisibility>;
     return {
+      articleOverrides: parsed.articleOverrides ?? {},
       deletedArticleIds: parsed.deletedArticleIds ?? [],
       hiddenArticleIds: parsed.hiddenArticleIds ?? [],
     };
   } catch {
-    return { deletedArticleIds: [], hiddenArticleIds: [] };
+    return { articleOverrides: {}, deletedArticleIds: [], hiddenArticleIds: [] };
   }
 }
 
@@ -48,7 +63,9 @@ export async function getVisibleStaticArticles() {
     ...visibility.hiddenArticleIds,
     ...visibility.deletedArticleIds,
   ]);
-  return latestArticles.filter((article) => !hiddenIds.has(article.id));
+  return latestArticles
+    .filter((article) => !hiddenIds.has(article.id))
+    .map((article) => applyStaticArticleOverride(article, visibility));
 }
 
 export async function hideStaticArticle(id: string, mode: "deleted" | "hidden" = "hidden") {
@@ -69,6 +86,7 @@ export async function hideStaticArticle(id: string, mode: "deleted" | "hidden" =
     hiddenIds.add(id);
   }
   const next = {
+    articleOverrides: visibility.articleOverrides,
     deletedArticleIds: [...deletedIds],
     hiddenArticleIds: [...hiddenIds],
   };
@@ -79,6 +97,7 @@ export async function hideStaticArticle(id: string, mode: "deleted" | "hidden" =
 export async function restoreStaticArticle(id: string) {
   const visibility = await readArticleVisibility();
   const next = {
+    articleOverrides: visibility.articleOverrides,
     deletedArticleIds: visibility.deletedArticleIds.filter((item) => item !== id),
     hiddenArticleIds: visibility.hiddenArticleIds.filter((item) => item !== id),
   };
@@ -89,6 +108,7 @@ export async function restoreStaticArticle(id: string) {
 export async function purgeStaticArticle(id: string) {
   const visibility = await readArticleVisibility();
   const next = {
+    articleOverrides: visibility.articleOverrides,
     deletedArticleIds: visibility.deletedArticleIds.filter((item) => item !== id),
     hiddenArticleIds: visibility.hiddenArticleIds.filter((item) => item !== id),
   };
@@ -99,7 +119,9 @@ export async function purgeStaticArticle(id: string) {
 export async function getDeletedStaticArticles() {
   const visibility = await readArticleVisibility();
   const deletedIds = new Set(visibility.deletedArticleIds);
-  return latestArticles.filter((article) => deletedIds.has(article.id));
+  return latestArticles
+    .filter((article) => deletedIds.has(article.id))
+    .map((article) => applyStaticArticleOverride(article, visibility));
 }
 
 export async function getHiddenStaticArticles() {
@@ -108,5 +130,90 @@ export async function getHiddenStaticArticles() {
   const hiddenIds = new Set(visibility.hiddenArticleIds);
   return latestArticles.filter(
     (article) => hiddenIds.has(article.id) && !deletedIds.has(article.id),
-  );
+  ).map((article) => applyStaticArticleOverride(article, visibility));
+}
+
+export async function getStaticArticleById(id: string) {
+  const visibility = await readArticleVisibility();
+  const article = latestArticles.find((item) => item.id === id);
+  return article ? applyStaticArticleOverride(article, visibility) : null;
+}
+
+export async function updateStaticArticle(
+  id: string,
+  draft: {
+    body?: string;
+    category?: string;
+    date?: string;
+    image?: string;
+    imageSource?: string;
+    source?: string;
+    title?: string;
+  },
+) {
+  const article = latestArticles.find((item) => item.id === id);
+
+  if (!article) {
+    return { updated: false };
+  }
+
+  const visibility = await readArticleVisibility();
+  const current = visibility.articleOverrides[id] ?? {};
+  const nextOverride: StaticArticleOverride = {
+    ...current,
+    body:
+      draft.body === undefined
+        ? current.body
+        : draft.body
+            .split(/\n{2,}/)
+            .map((paragraph) => paragraph.trim())
+            .filter(Boolean),
+    category:
+      draft.category === undefined
+        ? current.category
+        : draft.category.trim() || undefined,
+    date: draft.date === undefined ? current.date : draft.date.trim() || undefined,
+    image:
+      draft.image === undefined ? current.image : draft.image.trim() || undefined,
+    imageSource:
+      draft.imageSource === undefined
+        ? current.imageSource
+        : draft.imageSource.trim() || undefined,
+    source:
+      draft.source === undefined ? current.source : draft.source.trim() || undefined,
+    title:
+      draft.title === undefined ? current.title : draft.title.trim() || undefined,
+  };
+
+  const next = {
+    ...visibility,
+    articleOverrides: {
+      ...visibility.articleOverrides,
+      [id]: nextOverride,
+    },
+  };
+  await writeArticleVisibility(next);
+  return { article: applyStaticArticleOverride(article, next), updated: true };
+}
+
+function applyStaticArticleOverride(
+  article: StaticArticle,
+  visibility: ArticleVisibility,
+): StaticArticle {
+  const override = visibility.articleOverrides[article.id];
+
+  if (!override) {
+    return article;
+  }
+
+  return {
+    ...article,
+    body: override.body?.length ? override.body : article.body,
+    category: override.category ?? article.category,
+    date: override.date ?? article.date,
+    image: override.image ?? article.image,
+    imageSource: override.imageSource ?? article.imageSource,
+    source: override.source ?? article.source,
+    title: override.title ?? article.title,
+  };
 }

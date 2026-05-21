@@ -7,8 +7,9 @@ import { CandidateEditForm } from "@/components/candidate-edit-form";
 import { DeleteCandidateButton } from "@/components/delete-candidate-button";
 import { SiteHeader } from "@/components/site-header";
 import { StaticArticleAdminButtons } from "@/components/static-article-admin-buttons";
+import { StaticArticleEditForm } from "@/components/static-article-edit-form";
 import { XPostCard } from "@/components/x-post-card";
-import { latestArticles } from "@/lib/mock-data";
+import { getStaticArticleById } from "@/lib/article-visibility";
 import {
   buildCandidateDraft,
   getCandidateImage,
@@ -23,7 +24,7 @@ export default async function PublishedArticleAdminPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const staticArticle = latestArticles.find((article) => article.id === id);
+  const staticArticle = await getStaticArticleById(id);
 
   if (staticArticle) {
     return (
@@ -56,6 +57,7 @@ export default async function PublishedArticleAdminPage({
                 <strong>固定記事の管理</strong>
                 <StaticArticleAdminButtons id={staticArticle.id} />
               </div>
+              <StaticArticleEditForm article={staticArticle} />
               <div className="generatedNotice">
                 <Sparkles size={16} />
                 公開ページのコピー編集画面です。日付: {staticArticle.date}

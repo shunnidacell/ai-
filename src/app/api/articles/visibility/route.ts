@@ -3,12 +3,22 @@ import {
   hideStaticArticle,
   purgeStaticArticle,
   restoreStaticArticle,
+  updateStaticArticle,
 } from "@/lib/article-visibility";
 
 export async function PATCH(request: Request) {
   try {
     const body = (await request.json()) as {
       action?: "delete" | "hide" | "purge" | "restore";
+      draft?: {
+        body?: string;
+        category?: string;
+        date?: string;
+        image?: string;
+        imageSource?: string;
+        source?: string;
+        title?: string;
+      };
       id?: string;
     };
 
@@ -17,6 +27,10 @@ export async function PATCH(request: Request) {
         { error: "id を指定してください。" },
         { status: 400 },
       );
+    }
+
+    if (body.draft) {
+      return NextResponse.json(await updateStaticArticle(body.id, body.draft));
     }
 
     if (body.action === "restore") {
