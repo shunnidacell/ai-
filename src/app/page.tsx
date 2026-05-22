@@ -1,26 +1,19 @@
-import Image from "next/image";
-import Link from "next/link";
 import type { CSSProperties } from "react";
+import {
+  HomeArticleExplorer,
+  type HomeExplorerArticle,
+} from "@/components/home-article-explorer";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { getVisibleStaticArticles } from "@/lib/article-visibility";
 import {
   buildCandidateDraft,
-  getHeadlineCandidates,
   getCandidateImage,
+  getHeadlineCandidates,
   getPublicCandidates,
   readCandidates,
 } from "@/lib/x-candidates";
 
 export const dynamic = "force-dynamic";
-
-type HomeArticle = {
-  id: string;
-  title: string;
-  date: string;
-  image: string;
-  source: string;
-  label: string;
-};
 
 export default async function Home() {
   const visibleStaticArticles = await getVisibleStaticArticles();
@@ -36,52 +29,87 @@ export default async function Home() {
     throw new Error("表示できる記事がありません。");
   }
 
-  const hero =
+  const hero: HomeExplorerArticle =
     headlineCandidate && headlineDraft
       ? {
-          category: "注目記事",
-          date: "候補管理から選択",
+          body: headlineDraft.body,
+          date: "編集部選定",
           excerpt: headlineDraft.summary,
-          href: `/articles/${headlineCandidate.id}`,
+          featuredPost: {
+            author: headlineCandidate.author,
+            body: headlineDraft.translation,
+            handle: headlineCandidate.author,
+            likes: "-",
+            newsValue: "Xポスト",
+            reposts: "-",
+            time: "",
+            url: headlineCandidate.url,
+          },
+          id: headlineCandidate.id,
           image: getCandidateImage(headlineCandidate),
+          label: "注目記事",
+          relatedPosts: [],
           source: headlineCandidate.author,
           title: headlineDraft.title,
         }
       : {
-          category: "注目記事",
+          body: lead.body,
           date: lead.date,
           excerpt: lead.excerpt,
-          href: `/articles/${lead.id}`,
+          featuredPost: lead.featuredPost,
+          id: lead.id,
           image: lead.image,
+          label: "注目記事",
+          relatedPosts: lead.relatedPosts,
           source: lead.source,
           title: lead.title,
         };
 
-  const publishedCandidateCards: HomeArticle[] = getPublicCandidates(candidates)
+  const publishedCandidateCards: HomeExplorerArticle[] = getPublicCandidates(
+    candidates,
+  )
     .filter((candidate) => candidate.id !== headlineCandidate?.id)
     .map((candidate) => {
       const draft = buildCandidateDraft(candidate);
       return {
-        id: candidate.id,
-        title: draft.title,
+        body: draft.body,
         date: formatCandidateDate(candidate.decidedAt ?? candidate.createdAt),
+        excerpt: draft.summary,
+        featuredPost: {
+          author: candidate.author,
+          body: draft.translation,
+          handle: candidate.author,
+          likes: "-",
+          newsValue: "Xポスト",
+          reposts: "-",
+          time: "",
+          url: candidate.url,
+        },
+        id: candidate.id,
         image: getCandidateImage(candidate),
-        source: candidate.author,
         label: candidate.decision === "headline" ? "見出し" : "公開",
+        relatedPosts: [],
+        source: candidate.author,
+        title: draft.title,
       };
     });
 
-  const articleCards: HomeArticle[] = [
-    ...publishedCandidateCards,
-    ...visibleStaticArticles.map((article, index) => ({
-      id: article.id,
-      title: article.title,
+  const staticArticleCards: HomeExplorerArticle[] = visibleStaticArticles.map(
+    (article, index) => ({
+      body: article.body,
       date: article.date,
+      excerpt: article.excerpt,
+      featuredPost: article.featuredPost,
+      id: article.id,
       image: article.image,
-      source: article.source,
       label: index === 0 ? "最新" : article.category,
-    })),
-  ];
+      relatedPosts: article.relatedPosts,
+      source: article.source,
+      title: article.title,
+    }),
+  );
+
+  const articleCards = [...publishedCandidateCards, ...staticArticleCards];
 
   return (
     <main
@@ -89,70 +117,7 @@ export default async function Home() {
       style={{ "--page-bg": `url(${hero.image})` } as CSSProperties}
     >
       <SiteHeader />
-
-      <Link className="heroCard hasHeroImage" href={hero.href}>
-        <div
-          aria-hidden="true"
-          className="heroFixedBg"
-          style={{ backgroundImage: `url(${hero.image})` }}
-        />
-        <div className="heroOverlay" />
-        <div className="heroContent">
-          <span className="badge">{hero.category}</span>
-          <h1>{hero.title}</h1>
-          <p>{hero.excerpt}</p>
-          <p className="sourceLine">
-            <span className="sourceAvatar">{hero.source.slice(0, 1)}</span>
-            {hero.source} ・ {hero.date} ・ AIニュース
-          </p>
-          <span className="heroCta">記事を読む</span>
-        </div>
-        <div className="heroVisual" aria-hidden="true">
-          <Image src={hero.image} alt="" fill priority sizes="(max-width: 720px) 90vw, 48vw" />
-        </div>
-        <div className="sliderDots" aria-hidden="true">
-          <span className="current" />
-          <span />
-          <span />
-          <span />
-        </div>
-      </Link>
-
-      <div className="homeContentLayout">
-        <section className="homeArticleGrid" aria-label="記事一覧">
-          {articleCards.map((article) => (
-            <Link
-              className="homeArticleCard"
-              href={`/articles/${article.id}`}
-              key={`${article.id}-${article.label}`}
-            >
-              <div className="homeArticleImage">
-                <Image
-                  src={article.image}
-                  alt=""
-                  fill
-                  sizes="(max-width: 720px) 100vw, (max-width: 1180px) 45vw, 260px"
-                />
-                <span>{article.label}</span>
-              </div>
-              <h2>{article.title}</h2>
-              <p>
-                <span>◎</span>
-                {article.date}
-              </p>
-            </Link>
-          ))}
-        </section>
-
-        <aside className="sponsorRail" aria-label="スポンサー枠">
-          <h2>スポンサー様</h2>
-          <div className="sponsorDivider" />
-          <div className="sponsorBanner">
-            <span>広告募集中</span>
-            <small>この枠でサービスをPRできます</small>
-          </div>
-        </aside>
-      </div>
+      <HomeArticleExplorer articles={articleCards} hero={hero} />
       <SiteFooter />
     </main>
   );
