@@ -1,6 +1,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { readJsonFromDb, writeJsonToDb } from "@/lib/db-store";
+import { generateArticleDraftWithOpenAI } from "@/lib/openai-article-generator";
 
 export type CandidateDecision = "draft" | "published" | "headline" | "rejected";
 
@@ -239,14 +240,22 @@ export async function registerCandidate(inputUrl: string, meta?: CandidateMeta) 
       postImageUrl: meta?.postImageUrl?.trim() || existing.postImageUrl,
       postText: meta?.postText?.trim() || existing.postText,
     };
+    const aiDraft = shouldGenerateDraft(existing, nextMeta.postText)
+      ? await generateArticleDraftWithOpenAI({
+          author: existing.author,
+          postText: nextMeta.postText ?? "",
+          postUrl: existing.url,
+        })
+      : null;
     const shouldUpdate =
       nextMeta.postImageUrl !== existing.postImageUrl ||
-      nextMeta.postText !== existing.postText;
+      nextMeta.postText !== existing.postText ||
+      Boolean(aiDraft);
 
     if (shouldUpdate) {
       const next = candidates.map((candidate) =>
         candidate.statusId === parsed.statusId
-          ? { ...candidate, ...nextMeta }
+          ? { ...candidate, ...nextMeta, ...draftToCandidateFields(aiDraft) }
           : candidate,
       );
       await writeCandidates(next);
@@ -260,6 +269,14 @@ export async function registerCandidate(inputUrl: string, meta?: CandidateMeta) 
     return { candidate: existing, created: false, updated: false };
   }
 
+  const aiDraft = meta?.postText
+    ? await generateArticleDraftWithOpenAI({
+        author: parsed.author,
+        postText: meta.postText,
+        postUrl: parsed.canonicalUrl,
+      })
+    : null;
+
   const candidate: XPostCandidate = {
     id: `${parsed.author}-${parsed.statusId}`,
     url: parsed.canonicalUrl,
@@ -270,12 +287,40 @@ export async function registerCandidate(inputUrl: string, meta?: CandidateMeta) 
     createdAt: new Date().toISOString(),
     postImageUrl: meta?.postImageUrl?.trim() || undefined,
     postText: meta?.postText?.trim() || undefined,
+    ...draftToCandidateFields(aiDraft),
   };
 
   candidates.unshift(candidate);
   await writeCandidates(candidates);
 
   return { candidate, created: true, updated: false };
+}
+
+function shouldGenerateDraft(candidate: XPostCandidate, postText?: string) {
+  if (!process.env.OPENAI_API_KEY || !postText?.trim()) {
+    return false;
+  }
+
+  return !(
+    candidate.draftTitle ||
+    candidate.draftSummary ||
+    candidate.draftTranslation ||
+    candidate.draftBody?.length
+  );
+}
+
+function draftToCandidateFields(draft: CandidateDraft | null) {
+  if (!draft) {
+    return {};
+  }
+
+  return {
+    draftBody: draft.body,
+    draftImagePrompt: draft.imagePrompt,
+    draftSummary: draft.summary,
+    draftTitle: draft.title,
+    draftTranslation: draft.translation,
+  };
 }
 
 export async function updateCandidateDecision(
