@@ -12,7 +12,7 @@ const adminPassword = process.env.ADMIN_PASSWORD;
 
 if (!adminUser || !adminPassword) {
   console.error(
-    "ADMIN_USER と ADMIN_PASSWORD が未設定です。.env.local に保存してください。",
+    "ADMIN_USER and ADMIN_PASSWORD are missing. Save them in .env.local.",
   );
   process.exit(1);
 }
@@ -35,7 +35,9 @@ if (stderr.trim()) {
 }
 
 if (urls.length === 0) {
-  console.log("ブックマークから登録できるXポストURLは見つかりませんでした。");
+  console.log("No X bookmark post URLs were found.");
+  console.log("Hermes output:");
+  console.log(stdout.trim() || "(empty)");
   process.exit(0);
 }
 
@@ -51,11 +53,11 @@ const response = await fetch(`${siteUrl.replace(/\/$/, "")}/api/x-candidates`, {
 const result = await response.json().catch(() => ({}));
 
 if (!response.ok) {
-  console.error(result.error ?? `登録に失敗しました。status=${response.status}`);
+  console.error(result.error ?? `Registration failed. status=${response.status}`);
   process.exit(1);
 }
 
-console.log(`${urls.length}件のXブックマークURLを候補へ同期しました。`);
+console.log(`${urls.length} X bookmark URLs were synced to candidates.`);
 for (const url of urls) {
   console.log(url);
 }
