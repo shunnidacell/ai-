@@ -19,9 +19,53 @@ export async function GET(request: Request) {
     return NextResponse.json(await checkOpenAIConfig());
   }
 
+  if (url.searchParams.get("debug") === "openai-generate") {
+    return NextResponse.json(await checkOpenAIGeneration());
+  }
+
   return NextResponse.json({
     candidates: await readCandidates(),
   });
+}
+
+async function checkOpenAIGeneration() {
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+
+  if (!apiKey) {
+    return {
+      keyConfigured: false,
+      ok: false,
+      status: null,
+      message: "OPENAI_API_KEY is not configured in this Render service.",
+    };
+  }
+
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${apiKey}`,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      model: process.env.OPENAI_ARTICLE_MODEL?.split(",")[0]?.trim() || "gpt-4.1",
+      messages: [
+        {
+          role: "user",
+          content:
+            'Return only JSON like {"title":"test","summary":"test","translation":"test","body":["test"],"imagePrompt":"test"}.',
+        },
+      ],
+      response_format: { type: "json_object" },
+    }),
+  });
+  const detail = await response.text().catch(() => "");
+
+  return {
+    keyConfigured: true,
+    ok: response.ok,
+    status: response.status,
+    message: response.ok ? "Generation request succeeded." : detail.slice(0, 1000),
+  };
 }
 
 async function checkOpenAIConfig() {
