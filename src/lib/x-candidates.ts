@@ -39,6 +39,17 @@ export type CandidateMeta = {
   postText?: string;
 };
 
+type ArticleSeed = {
+  action: string;
+  authorLabel: string;
+  domainLabel: string;
+  featureLabel: string;
+  isOss: boolean;
+  isSecuritySpecTool: boolean;
+  product: string;
+  translatedText: string;
+};
+
 const officialAccounts = new Set([
   "OpenAI",
   "OpenAIDevs",
@@ -170,8 +181,6 @@ export function classifyCandidate(author: string) {
 
 export function buildCandidateDraft(candidate: XPostCandidate): CandidateDraft {
   const postText = normalizePostText(candidate.postText);
-  const translatedPostText = translatePostTextForDraft(postText);
-  const topic = extractTopic(translatedPostText ?? postText, candidate.author);
 
   if (!postText) {
     return {
@@ -195,16 +204,17 @@ export function buildCandidateDraft(candidate: XPostCandidate): CandidateDraft {
     };
   }
 
+  const seed = buildArticleSeed(postText, candidate.author);
+  const auto = buildArticleDraftFromSeed(seed, postText);
+
   return {
-    body: candidate.draftBody?.length
-      ? candidate.draftBody
-      : buildBodyFromPost(translatedPostText ?? postText, candidate.author, postText),
+    body: candidate.draftBody?.length ? candidate.draftBody : auto.body,
     imagePrompt:
       candidate.draftImagePrompt ??
-      `Clean editorial AI news image about ${topic}, bright technology style, no text.`,
-    summary: candidate.draftSummary ?? buildSummary(translatedPostText ?? postText),
-    title: candidate.draftTitle ?? buildTitle(topic),
-    translation: candidate.draftTranslation ?? translatedPostText ?? postText,
+      `Clean editorial AI news image about ${seed.product}, ${seed.domainLabel}, bright technology style, no text.`,
+    summary: candidate.draftSummary ?? auto.summary,
+    title: candidate.draftTitle ?? auto.title,
+    translation: candidate.draftTranslation ?? seed.translatedText,
   };
 }
 
@@ -397,57 +407,151 @@ function normalizePostText(value?: string) {
     .trim();
 }
 
-function extractTopic(postText: string | undefined, author: string) {
-  if (!postText) {
-    return `${author}のAI関連ポスト`;
+function buildArticleSeed(postText: string, author: string): ArticleSeed {
+  const product = extractProductName(postText) ?? `${author}のAIツール`;
+  const translatedText = translatePostTextForDraft(postText, product);
+  const lower = postText.toLowerCase();
+  const isOss =
+    /oss|open source|open-source|github|公開|オープンソース/i.test(postText);
+  const isSecuritySpecTool =
+    /spec|specification|仕様|audit|security|監査|bug|bugs|vulnerability|脆弱/i.test(
+      postText,
+    );
+
+  return {
+    action: isOss ? "OSS公開" : detectAction(postText),
+    authorLabel: prettifyAuthor(author),
+    domainLabel: isSecuritySpecTool
+      ? "AIセキュリティ監査"
+      : lower.includes("agent") || postText.includes("エージェント")
+        ? "AIエージェント活用"
+        : "AIツール活用",
+    featureLabel: isSecuritySpecTool
+      ? "仕様書に書かれたルールをもとに、実装とのズレを検出する仕組み"
+      : "AIを使った作業の流れを改善する仕組み",
+    isOss,
+    isSecuritySpecTool,
+    product,
+    translatedText,
+  };
+}
+
+function buildArticleDraftFromSeed(seed: ArticleSeed, originalPostText: string) {
+  const title = seed.isSecuritySpecTool
+    ? `コードではなく「仕様書」からバグを探すAI監査ツール、${seed.product}が${seed.action}`
+    : `${seed.product}が${seed.action}、AI活用の新しい選択肢に`;
+
+  const summary = [
+    `${seed.authorLabel}が、${seed.domainLabel}に関する「${seed.product}」を${seed.action}しました。`,
+    `${seed.product}は、${seed.featureLabel}です。`,
+    `${seed.domainLabel}の新しいアプローチとして注目されます。`,
+  ].join("\n\n");
+
+  const body = seed.isSecuritySpecTool
+    ? buildSecuritySpecBody(seed)
+    : buildGeneralToolBody(seed);
+
+  if (isLikelyEnglish(originalPostText)) {
+    body.splice(3, 0, `原文の要点: ${seed.translatedText}`);
   }
 
-  const firstSentence = postText
-    .split(/[。！？!?]/)
-    .map((part) => part.trim())
-    .find(Boolean);
-  const topic = firstSentence ?? postText;
-  return topic.length > 42 ? `${topic.slice(0, 42)}...` : topic;
+  return { body, summary, title };
 }
 
-function buildTitle(topic: string) {
-  const cleanTopic = topic
-    .replace(/^今回紹介するのは/, "")
-    .replace(/^これは/, "")
-    .trim();
-
-  return cleanTopic;
-}
-
-function buildSummary(postText: string) {
-  const summary = postText.length > 92 ? `${postText.slice(0, 92)}...` : postText;
-  return `Xで注目したポストをもとに、内容と使いどころを整理します。${summary}`;
-}
-
-function buildBodyFromPost(postText: string, author: string, originalPostText?: string) {
-  const body = [
-    `${author} のXポストで紹介されていた内容をもとに、ポイントを整理します。`,
-    postText,
+function buildSecuritySpecBody(seed: ArticleSeed) {
+  return [
+    `${seed.authorLabel}は、AIを活用したセキュリティ監査フレームワーク「${seed.product}」を${seed.action}しました。`,
+    `${seed.product}の特徴は、コードから既知のバグパターンを探すだけではなく、まず仕様書を読み取り、「本来守られるべき条件」をチェックリスト化する点です。`,
+    "そのうえで、実装コードが仕様どおりに動いているかをAIが検証します。複雑なプロトコルやスマートコントラクトのように、仕様と実装のズレが大きな問題になりやすい分野で、特に相性のよい仕組みです。",
+    `この発表で公開された${seed.product}は、「仕様書」を起点にしたAI監査ツールです。`,
+    `一般的なコード解析ツールは、コードの中から怪しい書き方や既知の脆弱性パターンを探します。一方で${seed.product}は、まず仕様書に書かれたルールや前提条件を読み取り、それを監査用のチェックリストに変換します。`,
+    "その後、実装コードがその条件を満たしているかをAIが確認することで、「仕様ではこう書かれているのに、実装では違う動きをしている」というズレを見つけやすくします。",
+    "### なぜ「仕様書から探す」のが重要なのか",
+    "セキュリティ上の問題は、単純なコードミスだけで起きるわけではありません。",
+    "特にブロックチェーンや分散システムでは、「仕様の解釈ミス」や「実装ごとの挙動の違い」が重大なバグにつながることがあります。",
+    `${seed.product}は、そうした仕様レベルの問題をAIで見つけやすくするための仕組みです。`,
+    "今回のポイントは、AIが単にコードを読むだけではなく、「仕様書を理解して監査項目を作る」という部分です。",
+    "これは、AIエージェントによるセキュリティ監査が、より実務的な段階に進んでいることを示す動きとも言えます。",
+    `${seed.product}がどのように仕様書をチェックリスト化し、実装コードを検証するのか。以下で仕組みをもう少し詳しく見ていきます。`,
+    "### まとめ",
+    `${seed.product}は、AIによるセキュリティ監査の中でも「仕様と実装のズレ」に注目したツールです。`,
+    "コードだけを見てバグを探すのではなく、仕様書から守るべき条件を抽出し、それに対して実装が正しく動いているかを確認します。",
+    "このアプローチは、複雑なソフトウェアやブロックチェーン関連の監査で特に重要になりそうです。",
   ];
-
-  if (originalPostText && originalPostText !== postText) {
-    body.push(`原文メモ: ${originalPostText}`);
-  }
-
-  body.push(
-    "このポストは、AIツールやAI活用の実践に関する情報として候補に追加されました。公開前に、紹介されているツール名、手順、効果、注意点が事実と合っているか確認してください。",
-    "記事化する場合は、読者がすぐ試せるように、何ができるのか、どんな人に向いているのか、導入時の注意点を補足すると読みやすくなります。",
-  );
-
-  return body;
 }
 
-function translatePostTextForDraft(postText?: string) {
-  if (!postText || !isLikelyEnglish(postText)) {
+function buildGeneralToolBody(seed: ArticleSeed) {
+  return [
+    `${seed.authorLabel}は、AI活用に関する「${seed.product}」を${seed.action}しました。`,
+    `${seed.product}の特徴は、単に機能を増やすだけではなく、${seed.featureLabel}にあります。`,
+    "日々の開発や調査、コンテンツ制作では、AIツールをどう組み合わせるかによって作業効率が大きく変わります。今回の発表は、その実務的な使い方を考えるうえで参考になります。",
+    `この発表で紹介された${seed.product}は、AIを使った作業の流れを見直すためのツールです。`,
+    "特に注目したいのは、何を自動化し、どこを人間が確認するのかという役割分担です。",
+    "### どこが実用的なのか",
+    "AI関連ツールは数多く出ていますが、実際に使いやすいものは、導入したあとに作業の手順が明確になるものです。",
+    `${seed.product}は、そうした実務の流れに入りやすい候補として見ておく価値があります。`,
+    "今回のポイントは、AIが単独で何かを完結させるというより、人間の判断を補助しながら作業を進めやすくする点です。",
+    "以下で、どんな場面で使えそうか、注意点とあわせて整理します。",
+    "### まとめ",
+    `${seed.product}は、AI活用をより実務に近づけるためのツールとして注目できます。`,
+    "公開された情報だけで判断せず、実際の使い方、料金、導入条件、セキュリティ面を確認しながら試すのがよさそうです。",
+  ];
+}
+
+function extractProductName(text: string) {
+  const quoted = text.match(/[「\"]([A-Za-z0-9_.-]{2,40})[」\"]/)?.[1];
+  if (quoted) return quoted;
+
+  const known = text.match(/\b(SPECA|Claude Code|Cursor|Codex|Gemini|ChatGPT|GPT-[A-Za-z0-9.-]+)\b/)?.[1];
+  if (known) return known;
+
+  const afterNamed = text.match(/\bcalled\s+([A-Z][A-Za-z0-9_.-]{2,40})\b/i)?.[1];
+  if (afterNamed) return afterNamed;
+
+  const uppercase = text.match(/\b[A-Z][A-Z0-9_.-]{2,20}\b/)?.[0];
+  return uppercase;
+}
+
+function detectAction(text: string) {
+  if (/released|release|公開|リリース/i.test(text)) return "公開";
+  if (/launched|launch|発表/i.test(text)) return "発表";
+  if (/introduced|introducing|紹介/i.test(text)) return "紹介";
+  return "登場";
+}
+
+function prettifyAuthor(author: string) {
+  return author
+    .replace(/foundation$/i, " Foundation")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/^nyx foundation$/i, "Nyx Foundation");
+}
+
+function translatePostTextForDraft(postText: string, product: string) {
+  if (!isLikelyEnglish(postText)) {
     return postText;
   }
 
-  return roughTranslateEnglishPost(postText);
+  const lower = postText.toLowerCase();
+  const points = [];
+
+  if (lower.includes("spec") || lower.includes("specification")) {
+    points.push("仕様書を読み取り、守るべき条件を整理します");
+  }
+  if (lower.includes("audit") || lower.includes("security")) {
+    points.push("セキュリティ監査に使うことを想定しています");
+  }
+  if (lower.includes("bug") || lower.includes("vulnerab")) {
+    points.push("バグや脆弱性につながる実装のズレを見つけます");
+  }
+  if (lower.includes("open source") || lower.includes("oss")) {
+    points.push("オープンソースとして公開されています");
+  }
+
+  if (points.length === 0) {
+    points.push("英語ポストの内容を日本語向けに整理しました");
+  }
+
+  return `${product}について、${points.join("。")}。`;
 }
 
 function isLikelyEnglish(value: string) {
@@ -455,43 +559,4 @@ function isLikelyEnglish(value: string) {
   const japaneseLetters = value.match(/[ぁ-んァ-ヶ一-龠]/g)?.length ?? 0;
 
   return asciiLetters >= 24 && asciiLetters > japaneseLetters * 2;
-}
-
-function roughTranslateEnglishPost(value: string) {
-  const normalized = value
-    .replace(/\bAI\b/g, "AI")
-    .replace(/\bagent(s)?\b/gi, "AIエージェント")
-    .replace(/\bmodel(s)?\b/gi, "モデル")
-    .replace(/\bopen source\b/gi, "オープンソース")
-    .replace(/\bworkflow(s)?\b/gi, "ワークフロー")
-    .replace(/\bAPI(s)?\b/g, "API")
-    .replace(/\bdeveloper(s)?\b/gi, "開発者")
-    .replace(/\brelease(d|s)?\b/gi, "リリース")
-    .replace(/\blaunched\b/gi, "公開")
-    .replace(/\bintroducing\b/gi, "紹介")
-    .replace(/\bavailable\b/gi, "利用可能")
-    .replace(/\bnew\b/gi, "新しい")
-    .replace(/\bfree\b/gi, "無料")
-    .replace(/\blocal\b/gi, "ローカル")
-    .replace(/\bfast(er)?\b/gi, "高速")
-    .replace(/\btool(s)?\b/gi, "ツール")
-    .replace(/\bcode\b/gi, "コード")
-    .replace(/\buse\b/gi, "使う")
-    .replace(/\bcan\b/gi, "できる")
-    .replace(/\bwith\b/gi, "で")
-    .replace(/\bfor\b/gi, "向け")
-    .replace(/\band\b/gi, "と")
-    .replace(/\bto\b/gi, "へ")
-    .replace(/\bis\b/gi, "は")
-    .replace(/\bare\b/gi, "は")
-    .replace(/\bthe\b/gi, "")
-    .replace(/\ba\b/gi, "")
-    .replace(/\ban\b/gi, "")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  return [
-    "英語ポストの内容を日本語向けに整理しました。",
-    normalized,
-  ].join(" ");
 }

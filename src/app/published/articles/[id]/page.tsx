@@ -68,9 +68,13 @@ export default async function PublishedArticleAdminPage({
                 <XPostCard post={staticArticle.featuredPost} />
               </section>
 
-              {staticArticle.body.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
+              {staticArticle.body.map((paragraph) =>
+                paragraph.startsWith("### ") ? (
+                  <h2 key={paragraph}>{paragraph.replace(/^###\s+/, "")}</h2>
+                ) : (
+                  <p key={paragraph}>{paragraph}</p>
+                ),
+              )}
             </div>
 
             <aside className="reactionPanel">
@@ -174,9 +178,13 @@ export default async function PublishedArticleAdminPage({
             </section>
 
             <p>{draft.summary}</p>
-            {draft.body.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
+            {draft.body.map((paragraph) =>
+              paragraph.startsWith("### ") ? (
+                <h2 key={paragraph}>{paragraph.replace(/^###\s+/, "")}</h2>
+              ) : (
+                <p key={paragraph}>{paragraph}</p>
+              ),
+            )}
           </div>
 
           <aside className="reactionPanel">

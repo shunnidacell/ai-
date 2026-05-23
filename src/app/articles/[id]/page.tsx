@@ -52,9 +52,13 @@ export default async function ArticlePage({
 
         <div className="simpleArticleBody">
           <section className="simpleArticleCopy">
-            {article.body.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
+            {article.body.map((paragraph) =>
+              paragraph.startsWith("### ") ? (
+                <h2 key={paragraph}>{paragraph.replace(/^###\s+/, "")}</h2>
+              ) : (
+                <p key={paragraph}>{paragraph}</p>
+              ),
+            )}
           </section>
 
           <aside className="simpleSourcePanel">
