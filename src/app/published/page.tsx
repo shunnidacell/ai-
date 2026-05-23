@@ -1,6 +1,4 @@
-import Image from "next/image";
 import Link from "next/link";
-import type { CSSProperties } from "react";
 import { CandidateDecisionButtons } from "@/components/candidate-decision-buttons";
 import { DeletedItemActions } from "@/components/deleted-item-actions";
 import { DeleteCandidateButton } from "@/components/delete-candidate-button";
@@ -16,7 +14,6 @@ import { latestArticles } from "@/lib/mock-data";
 import {
   buildCandidateDraft,
   getDeletedCandidates,
-  getCandidateImage,
   getHeadlineCandidates,
   getPublicCandidates,
   readCandidates,
@@ -30,7 +27,6 @@ type AdminArticleCard = {
   date: string;
   href: string;
   id: string;
-  image: string;
   label: string;
   title: string;
 };
@@ -62,20 +58,18 @@ export default async function PublishedPage() {
     headlineCandidate && headlineDraft
       ? {
           candidate: headlineCandidate,
-          category: "注目記事",
+          category: "見出し記事",
           date: "候補管理から選択",
           excerpt: headlineDraft.summary,
           href: `/published/articles/${headlineCandidate.id}`,
-          image: getCandidateImage(headlineCandidate),
           source: headlineCandidate.author,
           title: headlineDraft.title,
         }
       : {
-          category: "注目記事",
+          category: "見出し記事",
           date: lead.date,
           excerpt: lead.excerpt,
           href: `/published/articles/${lead.id}`,
-          image: lead.image,
           source: lead.source,
           title: lead.title,
         };
@@ -89,7 +83,6 @@ export default async function PublishedPage() {
         date: formatCandidateDate(candidate.decidedAt ?? candidate.createdAt),
         href: `/published/articles/${candidate.id}`,
         id: candidate.id,
-        image: getCandidateImage(candidate),
         label: candidate.decision === "headline" ? "見出し" : "公開",
         title: draft.title,
       };
@@ -99,7 +92,6 @@ export default async function PublishedPage() {
     date: article.date,
     href: `/published/articles/${article.id}`,
     id: article.id,
-    image: article.image,
     label: index === 0 ? "固定記事" : article.category,
     title: article.title,
   }));
@@ -107,78 +99,52 @@ export default async function PublishedPage() {
   const articleCards = [...publicCards, ...staticCards];
 
   return (
-    <main
-      className="siteShell fixedBackdropShell homeShell articleIndexShell"
-      style={{ "--page-bg": `url(${hero.image})` } as CSSProperties}
-    >
+    <main className="simpleSiteShell adminShell">
       <SiteHeader admin />
 
-      <section className="heroCard hasHeroImage">
-        <div
-          aria-hidden="true"
-          className="heroFixedBg"
-          style={{ backgroundImage: `url(${hero.image})` }}
-        />
-        <div className="heroOverlay" />
-        <div className="heroContent">
-          <span className="badge">{hero.category}</span>
+      <section className="simpleHero adminHero">
+        <div className="simpleHeroText">
+          <span>{hero.category}</span>
           <h1>{hero.title}</h1>
           <p>{hero.excerpt}</p>
           <p className="sourceLine">
-            <span className="sourceAvatar">{hero.source.slice(0, 1)}</span>
-            {hero.source} ・ {hero.date} ・ AIニュース
+            {hero.source} / {hero.date}
           </p>
           <Link className="heroCta" href={hero.href}>
-            記事を見る
+            記事を編集
           </Link>
-        </div>
-        <div className="heroVisual" aria-hidden="true">
-          <Image src={hero.image} alt="" fill priority sizes="(max-width: 720px) 90vw, 48vw" />
-        </div>
-        {hero.candidate && (
-          <div className="heroAdminActions">
-            <CandidateDecisionButtons
-              allowHeadline={
-                hero.candidate.sourceType === "official" ||
-                hero.candidate.sourceType === "developer"
-              }
-              current={hero.candidate.decision}
-              id={hero.candidate.id}
-              mode="public"
-            />
-            <DeleteCandidateButton id={hero.candidate.id} />
-          </div>
-        )}
-        <div className="sliderDots" aria-hidden="true">
-          <span className="current" />
-          <span />
-          <span />
-          <span />
+          {hero.candidate && (
+            <div className="candidatePublicActions">
+              <CandidateDecisionButtons
+                allowHeadline={
+                  hero.candidate.sourceType === "official" ||
+                  hero.candidate.sourceType === "developer"
+                }
+                current={hero.candidate.decision}
+                id={hero.candidate.id}
+                mode="public"
+              />
+              <DeleteCandidateButton id={hero.candidate.id} />
+            </div>
+          )}
         </div>
       </section>
 
-      <div className="homeContentLayout">
-        <section className="homeArticleGrid" aria-label="公開記事一覧">
+      <section className="simpleArticleSection">
+        <div className="simpleSectionHead">
+          <h2>公開中の記事</h2>
+          <p>公開サイトに表示される記事です。非公開、削除、見出し切り替えをここで管理します。</p>
+        </div>
+        <div className="simpleArticleGrid">
           {articleCards.map((article) => (
             <article
-              className="homeArticleCard publishedAdminCard"
+              className="simpleArticleCard publishedAdminCard"
               key={`${article.id}-${article.label}`}
             >
               <Link href={article.href}>
-                <div className="homeArticleImage">
-                  <Image
-                    src={article.image}
-                    alt=""
-                    fill
-                    sizes="(max-width: 720px) 100vw, (max-width: 1180px) 45vw, 260px"
-                  />
-                  <span>{article.label}</span>
-                </div>
-                <h2>{article.title}</h2>
-                <p>
-                  <span>◎</span>
-                  {article.date}
-                </p>
+                <span>{article.label}</span>
+                <h3>{article.title}</h3>
+                <small>{article.date}</small>
               </Link>
 
               {article.candidate ? (
@@ -199,21 +165,15 @@ export default async function PublishedPage() {
               )}
             </article>
           ))}
-        </section>
-
-        <aside className="sponsorRail" aria-label="スポンサー枠">
-          <h2>スポンサー様</h2>
-          <div className="sponsorDivider" />
-          <div className="sponsorBanner">
-            <span>広告募集中</span>
-            <small>この枠でサービスをPRできます</small>
-          </div>
-        </aside>
-      </div>
+        </div>
+      </section>
 
       <section className="panel deletedItemsPanel">
         <div className="panelHeader">
-          <h1>非公開にした記事</h1>
+          <div>
+            <p className="adminKicker">非公開</p>
+            <h1>非公開にした記事</h1>
+          </div>
         </div>
         <div className="deletedItemList">
           {hiddenCandidateArticles.length === 0 &&
@@ -228,7 +188,9 @@ export default async function PublishedPage() {
                     <Link href={`/published/articles/${candidate.id}`}>
                       <strong>{draft.title}</strong>
                     </Link>
-                    <p>{candidate.author} ・ {candidate.decidedAt}</p>
+                    <p>
+                      {candidate.author} / {candidate.decidedAt}
+                    </p>
                     <div className="candidatePublicActions">
                       <CandidateDecisionButtons
                         allowHeadline={
@@ -249,7 +211,9 @@ export default async function PublishedPage() {
                   <Link href={`/published/articles/${article.id}`}>
                     <strong>{article.title}</strong>
                   </Link>
-                  <p>{article.source} ・ {article.date}</p>
+                  <p>
+                    {article.source} / {article.date}
+                  </p>
                   <HiddenStaticArticleActions id={article.id} />
                 </article>
               ))}
@@ -260,7 +224,10 @@ export default async function PublishedPage() {
 
       <section className="panel deletedItemsPanel">
         <div className="panelHeader">
-          <h1>削除した公開記事</h1>
+          <div>
+            <p className="adminKicker">削除済み</p>
+            <h1>削除した公開記事</h1>
+          </div>
         </div>
         <div className="deletedItemList">
           {deletedCandidateArticles.length === 0 &&
@@ -273,7 +240,9 @@ export default async function PublishedPage() {
                 return (
                   <article className="deletedItemCard" key={candidate.id}>
                     <strong>{draft.title}</strong>
-                    <p>{candidate.author} ・ {candidate.deletedAt}</p>
+                    <p>
+                      {candidate.author} / {candidate.deletedAt}
+                    </p>
                     <DeletedItemActions id={candidate.id} type="candidate" />
                   </article>
                 );
@@ -281,7 +250,9 @@ export default async function PublishedPage() {
               {deletedStaticArticles.map((article) => (
                 <article className="deletedItemCard" key={article.id}>
                   <strong>{article.title}</strong>
-                  <p>{article.source} ・ {article.date}</p>
+                  <p>
+                    {article.source} / {article.date}
+                  </p>
                   <DeletedItemActions id={article.id} type="static" />
                 </article>
               ))}

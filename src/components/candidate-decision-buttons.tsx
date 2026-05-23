@@ -53,7 +53,7 @@ export function CandidateDecisionButtons({
             onClick={() => update(action.decision)}
             title={
               headlineBlocked
-                ? "見出しは大きなニュース・公式一次情報だけに使います。"
+                ? "見出しは大きなニュースや一次情報だけに使います。"
                 : undefined
             }
             type="button"
