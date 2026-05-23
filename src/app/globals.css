@@ -612,6 +612,30 @@
   -webkit-line-clamp: 2;
 }
 
+.candidateEmbedBox {
+  overflow: hidden;
+  max-height: 360px;
+  border: 1px solid #e4edf1;
+  border-radius: 14px;
+  background: #f8fbfc;
+}
+
+.candidateEmbedBox .xEmbedWrap {
+  margin: 0;
+}
+
+.candidateEmbedBox .twitter-tweet,
+.candidateEmbedBox iframe {
+  margin: 0 auto !important;
+}
+
+.candidateEmbedBox .xEmbedFallback {
+  display: flex;
+  margin: 0;
+  border: 0;
+  padding: 12px;
+}
+
 .candidateCompactActions {
   display: flex;
   flex-wrap: wrap;

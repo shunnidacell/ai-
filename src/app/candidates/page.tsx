@@ -6,6 +6,7 @@ import { CollectWithHermesButton } from "@/components/collect-with-hermes-button
 import { DeleteCandidateButton } from "@/components/delete-candidate-button";
 import { DeletedItemActions } from "@/components/deleted-item-actions";
 import { SiteHeader } from "@/components/site-header";
+import { XEmbed } from "@/components/x-embed";
 import {
   buildCandidateDraft,
   getCandidateImage,
@@ -123,6 +124,10 @@ function CandidateCompactCard({
         </div>
         <h2>{draft.title}</h2>
         <p>{draft.summary}</p>
+      </div>
+
+      <div className="candidateEmbedBox">
+        <XEmbed url={candidate.url} />
       </div>
 
       <div className="candidateCompactActions">
