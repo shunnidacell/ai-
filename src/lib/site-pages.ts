@@ -18,13 +18,13 @@ const storeKey = "site-pages";
 
 const defaults: SitePages = {
   contact: {
-    body: "広告掲載、PR記事、情報提供、修正依頼はこちらから受け付けます。",
+    body: "広告掲載、記事の修正依頼、情報提供はこちらから受け付けます。",
     linkHref: "mailto:contact@example.com",
     linkText: "contact@example.com",
     title: "お問い合わせ",
   },
   sns: {
-    body: "AI Insight JPのSNS導線です。公開用アカウントを決めたら、ここにXやYouTubeなどのリンクを追加します。",
+    body: "AI Insight JPのSNS一覧です。公開用アカウントを決めたら、ここにXやYouTubeなどのリンクを追加します。",
     linkHref: "https://x.com/",
     linkText: "Xを開く",
     title: "SNS",

@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { readSitePages } from "@/lib/site-pages";
 
@@ -7,10 +6,7 @@ export default async function ContactPage() {
   const page = pages.contact;
 
   return (
-    <main
-      className="siteShell fixedBackdropShell"
-      style={{ "--page-bg": 'url("/ai-chip-hero.png")' } as CSSProperties}
-    >
+    <main className="simpleSiteShell">
       <SiteHeader />
       <section className="simplePagePanel">
         <span className="badge">Contact</span>
