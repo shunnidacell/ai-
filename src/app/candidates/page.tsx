@@ -6,11 +6,10 @@ import { CollectWithHermesButton } from "@/components/collect-with-hermes-button
 import { DeleteCandidateButton } from "@/components/delete-candidate-button";
 import { DeletedItemActions } from "@/components/deleted-item-actions";
 import { SiteHeader } from "@/components/site-header";
-import { XEmbed } from "@/components/x-embed";
 import {
   buildCandidateDraft,
-  getDeletedCandidates,
   getCandidateImage,
+  getDeletedCandidates,
   readCandidates,
   sortCandidatesByNewest,
   type XPostCandidate,
@@ -34,10 +33,10 @@ export default async function CandidatesPage() {
   );
 
   return (
-    <main className="simpleSiteShell adminShell">
+    <main className="simpleSiteShell adminShell candidateDenseShell">
       <SiteHeader admin />
 
-      <section className="panel bookmarkIntakePanel">
+      <section className="panel bookmarkIntakePanel compactPanel">
         <div className="panelHeader">
           <div>
             <p className="adminKicker">Xブックマーク</p>
@@ -46,67 +45,41 @@ export default async function CandidatesPage() {
               Xでブックマークした中から記事化したいポストだけを選び、URLを貼って候補に追加します。
             </p>
             <p>
-              Hermesで自動同期する場合は、自分のPCで <code>npm run sync:bookmarks</code> を実行します。
+              自動同期はPCで <code>npm run sync:bookmarks:chrome</code> を実行します。
             </p>
           </div>
         </div>
         <BookmarkIntakeForm />
       </section>
 
-      <section className="panel candidatesPanel">
+      <section className="panel candidatesPanel compactPanel">
         <div className="panelHeader">
           <div>
             <p className="adminKicker">記事候補</p>
-            <h1>新しい記事を編集して公開判断</h1>
+            <h1>確認待ちの記事候補</h1>
+            <p>{reviewCandidates.length}件の候補があります。</p>
           </div>
           <CollectWithHermesButton />
         </div>
-        <div className="candidateList">
+        <div className="candidateCompactList">
           {reviewCandidates.length === 0 ? (
             <p className="emptyState">確認待ちの記事候補はありません。</p>
           ) : (
             reviewCandidates.map((candidate) => (
-              <article className="candidateReviewItem" key={candidate.id}>
-                <div className="candidateReviewMain">
-                  <div className="candidateStatusLine">
-                    <strong>{candidate.author}</strong>
-                    <span>{candidate.decision ?? "draft"}</span>
-                    <a href={candidate.url} target="_blank" rel="noreferrer">
-                      Xで開く
-                      <ArrowUpRight size={15} />
-                    </a>
-                  </div>
-
-                  <XEmbed url={candidate.url} />
-
-                  <div className="candidateActions">
-                    <CandidateDecisionButtons
-                      allowHeadline={
-                        candidate.sourceType === "official" ||
-                        candidate.sourceType === "developer"
-                      }
-                      current={candidate.decision}
-                      id={candidate.id}
-                    />
-                    <DeleteCandidateButton id={candidate.id} />
-                  </div>
-                </div>
-
-                <CandidateDraftPreview candidate={candidate} />
-              </article>
+              <CandidateCompactCard candidate={candidate} key={candidate.id} />
             ))
           )}
         </div>
       </section>
 
-      <section className="panel candidatesPanel deletedItemsPanel">
+      <section className="panel candidatesPanel deletedItemsPanel compactPanel">
         <div className="panelHeader">
           <div>
             <p className="adminKicker">削除済み</p>
             <h1>削除した下書き</h1>
           </div>
         </div>
-        <div className="deletedItemList">
+        <div className="deletedItemList compactDeletedList">
           {deletedCandidates.length === 0 ? (
             <p className="emptyState">削除した下書きはありません。</p>
           ) : (
@@ -129,7 +102,7 @@ export default async function CandidatesPage() {
   );
 }
 
-function CandidateDraftPreview({
+function CandidateCompactCard({
   candidate,
 }: {
   candidate: XPostCandidate;
@@ -138,14 +111,42 @@ function CandidateDraftPreview({
   const image = getCandidateImage(candidate);
 
   return (
-    <aside className="candidateDraftPreview">
-      <CandidateEditForm
-        draft={draft}
-        id={candidate.id}
-        image={image}
-        postImageUrl={candidate.postImageUrl}
-        postText={candidate.postText}
-      />
-    </aside>
+    <article className="candidateCompactCard">
+      <div className="candidateCompactMain">
+        <div className="candidateCompactMeta">
+          <strong>{candidate.author}</strong>
+          <span>{candidate.decision ?? "draft"}</span>
+          <a href={candidate.url} target="_blank" rel="noreferrer">
+            Xで開く
+            <ArrowUpRight size={14} />
+          </a>
+        </div>
+        <h2>{draft.title}</h2>
+        <p>{draft.summary}</p>
+      </div>
+
+      <div className="candidateCompactActions">
+        <CandidateDecisionButtons
+          allowHeadline={
+            candidate.sourceType === "official" ||
+            candidate.sourceType === "developer"
+          }
+          current={candidate.decision}
+          id={candidate.id}
+        />
+        <DeleteCandidateButton id={candidate.id} />
+      </div>
+
+      <details className="candidateEditDetails">
+        <summary>編集を開く</summary>
+        <CandidateEditForm
+          draft={draft}
+          id={candidate.id}
+          image={image}
+          postImageUrl={candidate.postImageUrl}
+          postText={candidate.postText}
+        />
+      </details>
+    </article>
   );
 }
