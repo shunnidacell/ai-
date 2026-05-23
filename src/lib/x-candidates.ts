@@ -415,6 +415,36 @@ export async function updateCandidateDraft(
   return { candidates: next };
 }
 
+export async function regenerateCandidateDraft(id: string) {
+  const candidates = await readCandidates();
+  const candidate = candidates.find((item) => item.id === id);
+
+  if (!candidate) {
+    throw new Error("候補が見つかりません。");
+  }
+
+  if (!candidate.postText?.trim()) {
+    throw new Error("Xポスト本文がないため、AI再生成できません。");
+  }
+
+  const aiDraft = await generateArticleDraftWithOpenAI({
+    author: candidate.author,
+    postText: candidate.postText,
+    postUrl: candidate.url,
+  });
+
+  if (!aiDraft) {
+    throw new Error("AI記事生成に失敗しました。APIキー、モデル、利用上限を確認してください。");
+  }
+
+  const next = candidates.map((item) =>
+    item.id === id ? { ...item, ...draftToCandidateFields(aiDraft) } : item,
+  );
+
+  await writeCandidates(next);
+  return { candidates: next, regenerated: true };
+}
+
 export async function deleteCandidate(id: string) {
   const candidates = await readCandidates();
   const deletedAt = new Date().toISOString();

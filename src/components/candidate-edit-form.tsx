@@ -16,12 +16,13 @@ export function CandidateEditForm({
   postImageUrl?: string;
   postText?: string;
 }) {
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<"save" | "regenerate" | null>(null);
+  const [message, setMessage] = useState("");
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    setBusy(true);
+    setBusy("save");
     await fetch("/api/x-candidates", {
       method: "PATCH",
       headers: { "content-type": "application/json" },
@@ -42,8 +43,38 @@ export function CandidateEditForm({
     window.location.reload();
   }
 
+  async function regenerate() {
+    setBusy("regenerate");
+    setMessage("AIで記事下書きを再生成しています...");
+    const response = await fetch("/api/x-candidates", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ action: "regenerate", id }),
+    });
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      setBusy(null);
+      setMessage(result.error ?? "AI再生成に失敗しました。");
+      return;
+    }
+
+    window.location.reload();
+  }
+
   return (
     <form className="candidateEditForm" onSubmit={save}>
+      <div className="candidateEditToolbar">
+        <button
+          disabled={Boolean(busy) || !postText}
+          onClick={regenerate}
+          type="button"
+        >
+          {busy === "regenerate" ? "AI再生成中" : "AIで再生成"}
+        </button>
+        {message && <span>{message}</span>}
+      </div>
+
       <label>
         タイトル
         <input defaultValue={draft.title} name="title" />
@@ -76,8 +107,8 @@ export function CandidateEditForm({
         画像生成プロンプト
         <textarea defaultValue={draft.imagePrompt} name="imagePrompt" rows={3} />
       </label>
-      <button disabled={busy} type="submit">
-        {busy ? "保存中" : "編集内容を保存"}
+      <button disabled={Boolean(busy)} type="submit">
+        {busy === "save" ? "保存中" : "編集内容を保存"}
       </button>
     </form>
   );

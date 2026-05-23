@@ -2530,6 +2530,19 @@ h1 {
   font-weight: 900;
 }
 
+.candidateEditToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.candidateEditToolbar span {
+  color: #64708f;
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .adminSimpleEditor {
   display: grid;
   gap: 16px;

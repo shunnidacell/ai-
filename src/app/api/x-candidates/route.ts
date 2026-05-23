@@ -5,6 +5,7 @@ import {
   deleteCandidate,
   purgeCandidate,
   readCandidates,
+  regenerateCandidateDraft,
   registerCandidate,
   restoreCandidate,
   updateCandidateDecision,
@@ -104,6 +105,7 @@ export async function DELETE(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const body = (await request.json()) as {
+      action?: "regenerate";
       decision?: CandidateDecision;
       draft?: {
         body?: string;
@@ -118,11 +120,15 @@ export async function PATCH(request: Request) {
       id?: string;
     };
 
-    if (!body.id || (!body.decision && !body.draft)) {
+    if (!body.id || (!body.decision && !body.draft && !body.action)) {
       return NextResponse.json(
         { error: "id と更新内容を指定してください。" },
         { status: 400 },
       );
+    }
+
+    if (body.action === "regenerate") {
+      return NextResponse.json(await regenerateCandidateDraft(body.id));
     }
 
     if (
@@ -170,9 +176,14 @@ export async function PATCH(request: Request) {
     return NextResponse.json(
       await updateCandidateDecision(body.id, body.decision),
     );
-  } catch {
+  } catch (error) {
     return NextResponse.json(
-      { error: "候補の状態更新に失敗しました。" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "候補の状態更新に失敗しました。",
+      },
       { status: 400 },
     );
   }
