@@ -81,7 +81,7 @@ for (let i = 0; i < 8; i += 1) {
   await page.waitForTimeout(1400);
 }
 
-const posts = [...discovered.values()].slice(0, maxBookmarks);
+let posts = [...discovered.values()].slice(0, maxBookmarks);
 
 if (posts.length === 0) {
   console.log("No X bookmark post URLs were found in the visible Chrome page.");
@@ -89,6 +89,8 @@ if (posts.length === 0) {
   await browser.close();
   process.exit(0);
 }
+
+posts = await enrichPostsFromStatusPages(page, posts);
 
 const response = await fetch(`${siteUrl.replace(/\/$/, "")}/api/x-candidates`, {
   method: "POST",
@@ -108,9 +110,12 @@ if (!response.ok) {
   process.exit(1);
 }
 
-console.log(`${posts.length} X bookmark posts were synced to candidates.`);
+console.log(
+  `${posts.length} X bookmark posts were synced to candidates. ` +
+    `Text found: ${posts.filter((post) => post.postText).length}/${posts.length}.`,
+);
 for (const post of posts) {
-  console.log(post.url);
+  console.log(`${post.postText ? "[text]" : "[url] "} ${post.url}`);
 }
 
 if (keepOpen) {
@@ -149,6 +154,7 @@ async function collectBookmarkPosts(page) {
           .filter(Boolean)
           .join("\n")
           .trim() ||
+        cleanPostText(article.innerText) ||
         undefined;
 
       const postImageUrl =
@@ -177,6 +183,125 @@ async function collectBookmarkPosts(page) {
       } catch {
         return null;
       }
+    }
+
+    function cleanPostText(raw) {
+      const noise = new Set([
+        "Ad",
+        "From",
+        "Like",
+        "Likes",
+        "Log in",
+        "Post",
+        "Quote",
+        "Reply",
+        "Repost",
+        "Reposts",
+        "Share",
+        "Show more",
+        "Sign in",
+        "Translate post",
+        "View",
+      ]);
+
+      const lines = String(raw ?? "")
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .filter((line) => !noise.has(line))
+        .filter((line) => !/^@\w+$/.test(line))
+        .filter((line) => !/^\d+[,.]?\d*[KMB]?$/.test(line))
+        .filter((line) => !/^\d+\s*(Reply|Replies|Repost|Reposts|Like|Likes|View|Views)$/i.test(line))
+        .filter((line) => !/^·$/.test(line));
+
+      return lines.join("\n").trim();
+    }
+  });
+}
+
+async function enrichPostsFromStatusPages(page, posts) {
+  const enriched = [];
+
+  for (const post of posts) {
+    if (post.postText?.trim()) {
+      enriched.push(post);
+      continue;
+    }
+
+    try {
+      await page.goto(post.url, { waitUntil: "domcontentloaded", timeout: 30000 });
+      await page.waitForTimeout(3500);
+      const details = await collectPostDetails(page);
+      enriched.push({
+        ...post,
+        postImageUrl: post.postImageUrl ?? details.postImageUrl,
+        postText: details.postText ?? post.postText,
+      });
+    } catch (error) {
+      console.warn(`Could not read post text: ${post.url}`);
+      enriched.push(post);
+    }
+  }
+
+  return enriched;
+}
+
+async function collectPostDetails(page) {
+  return page.evaluate(() => {
+    const article = document.querySelector('article');
+
+    if (!article) {
+      return {};
+    }
+
+    const tweetText = article.querySelector('[data-testid="tweetText"]');
+    const postText =
+      tweetText?.innerText?.trim() ||
+      Array.from(article.querySelectorAll('[data-testid="tweetText"] span, [lang]'))
+        .map((node) => node.innerText?.trim())
+        .filter(Boolean)
+        .join("\n")
+        .trim() ||
+      cleanPostText(article.innerText) ||
+      undefined;
+
+    const postImageUrl =
+      Array.from(article.querySelectorAll('img[src*="twimg.com/media"]'))
+        .map((image) => image.src)
+        .find(Boolean) || undefined;
+
+    return { postImageUrl, postText };
+
+    function cleanPostText(raw) {
+      const noise = new Set([
+        "Ad",
+        "From",
+        "Like",
+        "Likes",
+        "Log in",
+        "Post",
+        "Quote",
+        "Reply",
+        "Repost",
+        "Reposts",
+        "Share",
+        "Show more",
+        "Sign in",
+        "Translate post",
+        "View",
+      ]);
+
+      const lines = String(raw ?? "")
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .filter((line) => !noise.has(line))
+        .filter((line) => !/^@\w+$/.test(line))
+        .filter((line) => !/^\d+[,.]?\d*[KMB]?$/.test(line))
+        .filter((line) => !/^\d+\s*(Reply|Replies|Repost|Reposts|Like|Likes|View|Views)$/i.test(line))
+        .filter((line) => !/^·$/.test(line));
+
+      return lines.join("\n").trim();
     }
   });
 }
