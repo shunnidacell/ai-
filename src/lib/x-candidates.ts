@@ -182,26 +182,29 @@ export function classifyCandidate(author: string) {
 
 export function buildCandidateDraft(candidate: XPostCandidate): CandidateDraft {
   const postText = normalizePostText(candidate.postText);
+  const hasSavedDraft = Boolean(
+    candidate.draftTitle ||
+      candidate.draftSummary ||
+      candidate.draftTranslation ||
+      candidate.draftBody?.length,
+  );
+  const hasGenericSavedTitle = isGenericDraftTitle(candidate.draftTitle);
+
+  if (postText && (!hasSavedDraft || hasGenericSavedTitle)) {
+    return emptyCandidateDraft();
+  }
 
   if (!postText) {
     return {
       body: candidate.draftBody?.length
         ? candidate.draftBody
-        : [
-            "この候補は、管理画面で登録されたXポストURLから作成されています。",
-            "公開前に、埋め込みでポスト本文と事実関係を確認してください。",
-            "必要に応じてタイトル、要約、本文を編集してから公開します。",
-          ],
+        : [],
       imagePrompt:
         candidate.draftImagePrompt ??
-        "Clean editorial AI news image based on the article title, bright technology style, no text.",
-      summary:
-        candidate.draftSummary ??
-        "登録されたXポストをもとにした記事候補です。公開前に本文、事実関係、画像を確認してください。",
-      title: candidate.draftTitle ?? `${candidate.author}のXポストから記事候補を作成`,
-      translation:
-        candidate.draftTranslation ??
-        "ポスト本文はまだ登録されていません。管理画面で本文を補完してください。",
+        "",
+      summary: candidate.draftSummary ?? "",
+      title: candidate.draftTitle ?? "",
+      translation: candidate.draftTranslation ?? "",
     };
   }
 
@@ -709,4 +712,24 @@ function cleanupGenericTitle(title: string) {
     .replace(/、?AI活用の新たな選択肢に/g, "")
     .replace(/、?AI活用の新しい可能性に/g, "")
     .trim();
+}
+
+function isGenericDraftTitle(title?: string) {
+  if (!title) {
+    return false;
+  }
+
+  return /AI活用の新しい選択肢に|AI活用の新たな選択肢に|AI活用の新しい可能性に/.test(
+    title,
+  );
+}
+
+function emptyCandidateDraft(): CandidateDraft {
+  return {
+    body: [],
+    imagePrompt: "",
+    summary: "",
+    title: "",
+    translation: "",
+  };
 }

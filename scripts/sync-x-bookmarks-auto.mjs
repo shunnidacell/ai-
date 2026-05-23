@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 
-const intervalMinutes = Number(process.env.BOOKMARK_SYNC_INTERVAL_MINUTES ?? 30);
+const intervalMinutes = Number(process.env.BOOKMARK_SYNC_INTERVAL_MINUTES ?? 10);
 const intervalMs = Math.max(intervalMinutes, 1) * 60 * 1000;
 
 console.log(`Bookmark auto sync started. Interval: ${intervalMinutes} minutes.`);
@@ -20,7 +20,7 @@ async function runOnce() {
       {
         env: {
           ...process.env,
-          X_HEADLESS: process.env.X_HEADLESS ?? "1",
+          X_HEADLESS: process.env.X_HEADLESS ?? "0",
         },
         shell: false,
         stdio: "inherit",
