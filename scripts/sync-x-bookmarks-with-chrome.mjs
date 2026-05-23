@@ -56,12 +56,21 @@ if (state === "blocked_or_error") {
   process.exit(1);
 }
 
-const discovered = new Set();
+const discovered = new Map();
 
 for (let i = 0; i < 8; i += 1) {
-  const urls = await collectStatusUrls(page);
-  for (const url of urls) {
-    discovered.add(url);
+  const posts = await collectBookmarkPosts(page);
+  for (const post of posts) {
+    if (!discovered.has(post.url)) {
+      discovered.set(post.url, post);
+    } else {
+      const current = discovered.get(post.url);
+      discovered.set(post.url, {
+        ...current,
+        postImageUrl: current.postImageUrl ?? post.postImageUrl,
+        postText: current.postText ?? post.postText,
+      });
+    }
   }
 
   if (discovered.size >= maxBookmarks) {
@@ -72,9 +81,9 @@ for (let i = 0; i < 8; i += 1) {
   await page.waitForTimeout(1400);
 }
 
-const urls = [...discovered].slice(0, maxBookmarks);
+const posts = [...discovered.values()].slice(0, maxBookmarks);
 
-if (urls.length === 0) {
+if (posts.length === 0) {
   console.log("No X bookmark post URLs were found in the visible Chrome page.");
   if (keepOpen) await waitForever();
   await browser.close();
@@ -87,7 +96,7 @@ const response = await fetch(`${siteUrl.replace(/\/$/, "")}/api/x-candidates`, {
     authorization: `Basic ${Buffer.from(`${adminUser}:${adminPassword}`).toString("base64")}`,
     "content-type": "application/json",
   },
-  body: JSON.stringify({ urls }),
+  body: JSON.stringify({ posts, urls: posts.map((post) => post.url) }),
 });
 
 const result = await response.json().catch(() => ({}));
@@ -99,9 +108,9 @@ if (!response.ok) {
   process.exit(1);
 }
 
-console.log(`${urls.length} X bookmark URLs were synced to candidates.`);
-for (const url of urls) {
-  console.log(url);
+console.log(`${posts.length} X bookmark posts were synced to candidates.`);
+for (const post of posts) {
+  console.log(post.url);
 }
 
 if (keepOpen) {
@@ -109,6 +118,68 @@ if (keepOpen) {
 }
 
 await browser.close();
+
+async function collectBookmarkPosts(page) {
+  return page.evaluate(() => {
+    const articles = Array.from(document.querySelectorAll('article'));
+    const posts = [];
+
+    for (const article of articles) {
+      const statusAnchor = Array.from(
+        article.querySelectorAll('a[href*="/status/"]'),
+      ).find((anchor) => {
+        try {
+          const url = new URL(anchor.href);
+          return /^\/[^/]+\/status\/\d+/.test(url.pathname);
+        } catch {
+          return false;
+        }
+      });
+
+      if (!statusAnchor) continue;
+
+      const url = normalizeStatusUrl(statusAnchor.href);
+      if (!url) continue;
+
+      const tweetText = article.querySelector('[data-testid="tweetText"]');
+      const postText =
+        tweetText?.innerText?.trim() ||
+        Array.from(article.querySelectorAll('[lang]'))
+          .map((node) => node.innerText?.trim())
+          .filter(Boolean)
+          .join("\n")
+          .trim() ||
+        undefined;
+
+      const postImageUrl =
+        Array.from(article.querySelectorAll('img[src*="twimg.com/media"]'))
+          .map((image) => image.src)
+          .find(Boolean) || undefined;
+
+      posts.push({ postImageUrl, postText, url });
+    }
+
+    if (posts.length > 0) {
+      return posts;
+    }
+
+    return Array.from(document.querySelectorAll('a[href*="/status/"]'))
+      .map((anchor) => normalizeStatusUrl(anchor.href))
+      .filter(Boolean)
+      .map((url) => ({ url }));
+
+    function normalizeStatusUrl(href) {
+      try {
+        const url = new URL(href);
+        const match = url.pathname.match(/^\/([^/]+)\/status\/(\d+)/);
+        if (!match) return null;
+        return `https://x.com/${match[1]}/status/${match[2]}`;
+      } catch {
+        return null;
+      }
+    }
+  });
+}
 
 async function collectStatusUrls(page) {
   return page.evaluate(() => {

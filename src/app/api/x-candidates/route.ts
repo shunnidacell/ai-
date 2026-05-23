@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   type CandidateDecision,
+  type CandidateMeta,
   deleteCandidate,
   purgeCandidate,
   readCandidates,
@@ -21,32 +22,40 @@ export async function POST(request: Request) {
     const body = (await request.json()) as {
       postImageUrl?: string;
       postText?: string;
+      posts?: Array<CandidateMeta & { url: string }>;
       url?: string;
       urls?: string[];
     };
-    const urls = body.urls ?? (body.url ? [body.url] : []);
 
-    if (urls.length === 0) {
+    const posts =
+      body.posts ??
+      (body.urls ?? (body.url ? [body.url] : [])).map((url) => ({
+        postImageUrl: body.postImageUrl,
+        postText: body.postText,
+        url,
+      }));
+
+    if (posts.length === 0) {
       return NextResponse.json(
-        { error: "url または urls を指定してください。" },
+        { error: "url または posts を指定してください。" },
         { status: 400 },
       );
     }
 
     const results = [];
 
-    for (const url of urls) {
+    for (const post of posts) {
       results.push(
-        await registerCandidate(url, {
-          postImageUrl: body.postImageUrl,
-          postText: body.postText,
+        await registerCandidate(post.url, {
+          postImageUrl: post.postImageUrl,
+          postText: post.postText,
         }),
       );
     }
 
     return NextResponse.json({
-      registered: results,
       candidates: await readCandidates(),
+      registered: results,
     });
   } catch (error) {
     return NextResponse.json(

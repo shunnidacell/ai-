@@ -34,6 +34,11 @@ export type CandidateDraft = {
   imagePrompt: string;
 };
 
+export type CandidateMeta = {
+  postImageUrl?: string;
+  postText?: string;
+};
+
 const officialAccounts = new Set([
   "OpenAI",
   "OpenAIDevs",
@@ -164,29 +169,41 @@ export function classifyCandidate(author: string) {
 }
 
 export function buildCandidateDraft(candidate: XPostCandidate): CandidateDraft {
-  const postText = candidate.postText?.trim();
-  const fallbackTitle = `${candidate.author}のXポストから記事候補を作成`;
-  const fallbackSummary =
-    "登録されたXポストをもとにした記事候補です。公開前に本文、事実関係、画像を確認してください。";
-  const fallbackBody = [
-    postText
-      ? `登録されたポストでは、${postText}`
-      : "この候補は、管理画面で登録されたXポストURLから作成されています。",
-    "公開する前に、ポスト本文、関連情報、日付、画像が正しいかを確認してください。",
-    "必要に応じてタイトルや本文を編集し、読者にとって分かりやすい記事に整えてから公開します。",
-  ];
+  const postText = normalizePostText(candidate.postText);
+  const topic = extractTopic(postText, candidate.author);
+
+  if (!postText) {
+    return {
+      body: candidate.draftBody?.length
+        ? candidate.draftBody
+        : [
+            "この候補は、管理画面で登録されたXポストURLから作成されています。",
+            "公開前に、埋め込みでポスト本文と事実関係を確認してください。",
+            "必要に応じてタイトル、要約、本文を編集してから公開します。",
+          ],
+      imagePrompt:
+        candidate.draftImagePrompt ??
+        "Clean editorial AI news image based on the article title, bright technology style, no text.",
+      summary:
+        candidate.draftSummary ??
+        "登録されたXポストをもとにした記事候補です。公開前に本文、事実関係、画像を確認してください。",
+      title: candidate.draftTitle ?? `${candidate.author}のXポストから記事候補を作成`,
+      translation:
+        candidate.draftTranslation ??
+        "ポスト本文はまだ登録されていません。管理画面で本文を補完してください。",
+    };
+  }
 
   return {
-    body: candidate.draftBody?.length ? candidate.draftBody : fallbackBody,
+    body: candidate.draftBody?.length
+      ? candidate.draftBody
+      : buildBodyFromPost(postText, candidate.author),
     imagePrompt:
       candidate.draftImagePrompt ??
-      "Clean editorial AI news image based on the article title, bright technology style, no text.",
-    summary: candidate.draftSummary ?? fallbackSummary,
-    title: candidate.draftTitle ?? fallbackTitle,
-    translation:
-      candidate.draftTranslation ??
-      postText ??
-      "ポスト本文はまだ登録されていません。管理画面で本文を補完してください。",
+      `Clean editorial AI news image about ${topic}, bright technology style, no text.`,
+    summary: candidate.draftSummary ?? buildSummary(postText),
+    title: candidate.draftTitle ?? buildTitle(topic),
+    translation: candidate.draftTranslation ?? postText,
   };
 }
 
@@ -198,10 +215,7 @@ export function getCandidateImage(candidate: XPostCandidate) {
   );
 }
 
-export async function registerCandidate(
-  inputUrl: string,
-  meta?: { postImageUrl?: string; postText?: string },
-) {
+export async function registerCandidate(inputUrl: string, meta?: CandidateMeta) {
   const parsed = parseXPostUrl(inputUrl);
   const classification = classifyCandidate(parsed.author);
   const candidates = await readCandidates();
@@ -210,7 +224,29 @@ export async function registerCandidate(
   );
 
   if (existing) {
-    return { candidate: existing, created: false };
+    const nextMeta = {
+      postImageUrl: meta?.postImageUrl?.trim() || existing.postImageUrl,
+      postText: meta?.postText?.trim() || existing.postText,
+    };
+    const shouldUpdate =
+      nextMeta.postImageUrl !== existing.postImageUrl ||
+      nextMeta.postText !== existing.postText;
+
+    if (shouldUpdate) {
+      const next = candidates.map((candidate) =>
+        candidate.statusId === parsed.statusId
+          ? { ...candidate, ...nextMeta }
+          : candidate,
+      );
+      await writeCandidates(next);
+      return {
+        candidate: next.find((candidate) => candidate.statusId === parsed.statusId),
+        created: false,
+        updated: true,
+      };
+    }
+
+    return { candidate: existing, created: false, updated: false };
   }
 
   const candidate: XPostCandidate = {
@@ -228,7 +264,7 @@ export async function registerCandidate(
   candidates.unshift(candidate);
   await writeCandidates(candidates);
 
-  return { candidate, created: true };
+  return { candidate, created: true, updated: false };
 }
 
 export async function updateCandidateDecision(
@@ -238,9 +274,7 @@ export async function updateCandidateDecision(
   const candidates = await readCandidates();
   const decidedAt = new Date().toISOString();
   let next = candidates.map((candidate) =>
-    candidate.id === id
-      ? { ...candidate, decision, decidedAt }
-      : candidate,
+    candidate.id === id ? { ...candidate, decision, decidedAt } : candidate,
   );
 
   if (decision === "headline") {
@@ -353,4 +387,47 @@ export async function purgeCandidate(id: string) {
   const next = candidates.filter((candidate) => candidate.id !== id);
   await writeCandidates(next);
   return { candidates: next, purged: next.length !== candidates.length };
+}
+
+function normalizePostText(value?: string) {
+  return value
+    ?.replace(/https?:\/\/\S+/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function extractTopic(postText: string | undefined, author: string) {
+  if (!postText) {
+    return `${author}のAI関連ポスト`;
+  }
+
+  const firstSentence = postText
+    .split(/[。！？!?]/)
+    .map((part) => part.trim())
+    .find(Boolean);
+  const topic = firstSentence ?? postText;
+  return topic.length > 42 ? `${topic.slice(0, 42)}...` : topic;
+}
+
+function buildTitle(topic: string) {
+  const cleanTopic = topic
+    .replace(/^今回紹介するのは/, "")
+    .replace(/^これは/, "")
+    .trim();
+
+  return `${cleanTopic}を解説`;
+}
+
+function buildSummary(postText: string) {
+  const summary = postText.length > 92 ? `${postText.slice(0, 92)}...` : postText;
+  return `Xで注目したポストをもとに、内容と使いどころを整理します。${summary}`;
+}
+
+function buildBodyFromPost(postText: string, author: string) {
+  return [
+    `${author} のXポストで紹介されていた内容をもとに、ポイントを整理します。`,
+    postText,
+    "このポストは、AIツールやAI活用の実践に関する情報として候補に追加されました。公開前に、紹介されているツール名、手順、効果、注意点が事実と合っているか確認してください。",
+    "記事化する場合は、読者がすぐ試せるように、何ができるのか、どんな人に向いているのか、導入時の注意点を補足すると読みやすくなります。",
+  ];
 }
