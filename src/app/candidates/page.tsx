@@ -45,6 +45,9 @@ export default async function CandidatesPage() {
             <p>
               Xでブックマークした中から記事化したいポストだけを選び、URLを貼って候補に追加します。
             </p>
+            <p>
+              Hermesで自動同期する場合は、自分のPCで <code>npm run sync:bookmarks</code> を実行します。
+            </p>
           </div>
         </div>
         <BookmarkIntakeForm />

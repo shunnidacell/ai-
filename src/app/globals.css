@@ -337,6 +337,14 @@
   font-weight: 900;
 }
 
+.adminShell code {
+  border: 1px solid #d7e4ea;
+  border-radius: 8px;
+  padding: 2px 6px;
+  background: #f0f7f8;
+  color: #102033;
+}
+
 .adminShell .candidateList,
 .adminShell .deletedItemList {
   display: grid;
