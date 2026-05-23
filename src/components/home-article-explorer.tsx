@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 export type HomeExplorerPost = {
@@ -41,21 +40,14 @@ export function HomeArticleExplorer({
           <p>{hero.excerpt}</p>
           <Link href={`/articles/${hero.id}`}>記事を読む</Link>
         </div>
-        <Link className="simpleHeroImage" href={`/articles/${hero.id}`}>
-          <Image
-            alt=""
-            fill
-            priority
-            sizes="(max-width: 760px) 100vw, 46vw"
-            src={hero.image}
-          />
-        </Link>
       </section>
 
       <section className="simpleArticleSection">
         <div className="simpleSectionHead">
           <h2>記事一覧</h2>
-          <p>ブックマークしたXポストから選んだ記事候補を、確認して公開していくためのシンプルな一覧です。</p>
+          <p>
+            ブックマークしたXポストから選んだ記事候補を、確認して公開していくための一覧です。
+          </p>
         </div>
 
         <div className="simpleArticleGrid">
@@ -65,14 +57,6 @@ export function HomeArticleExplorer({
               href={`/articles/${article.id}`}
               key={article.id}
             >
-              <div className="simpleArticleImage">
-                <Image
-                  alt=""
-                  fill
-                  sizes="(max-width: 760px) 100vw, (max-width: 1180px) 45vw, 320px"
-                  src={article.image}
-                />
-              </div>
               <span>{article.label}</span>
               <h3>{article.title}</h3>
               <p>{article.excerpt}</p>

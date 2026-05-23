@@ -1,14 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ExternalLink } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { getStaticArticleById } from "@/lib/article-visibility";
-import {
-  buildCandidateDraft,
-  getCandidateImage,
-  readCandidates,
-} from "@/lib/x-candidates";
+import { buildCandidateDraft, readCandidates } from "@/lib/x-candidates";
 import type { Article, XPost } from "@/lib/mock-data";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +13,6 @@ type DisplayArticle = {
   category: string;
   date: string;
   excerpt: string;
-  image: string;
   source: string;
   title: string;
   xPost?: XPost;
@@ -53,15 +47,6 @@ export default async function ArticlePage({
             <small>
               {article.source} / {article.date}
             </small>
-          </div>
-          <div className="simpleArticleHeroImage">
-            <Image
-              alt=""
-              fill
-              priority
-              sizes="(max-width: 760px) 100vw, 42vw"
-              src={article.image}
-            />
           </div>
         </header>
 
@@ -120,7 +105,6 @@ async function getArticle(id: string): Promise<DisplayArticle | null> {
     category: candidate.decision === "headline" ? "見出し" : "公開",
     date: formatCandidateDate(candidate.decidedAt ?? candidate.createdAt),
     excerpt: draft.summary,
-    image: getCandidateImage(candidate),
     source: candidate.author,
     title: draft.title,
     xPost: {
@@ -142,7 +126,6 @@ function fromStaticArticle(article: Article): DisplayArticle {
     category: article.category,
     date: article.date,
     excerpt: article.excerpt,
-    image: article.image,
     source: article.source,
     title: article.title,
     xPost: article.featuredPost,
