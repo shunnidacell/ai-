@@ -57,13 +57,21 @@ export async function generateArticleDraftWithOpenAI({
   }
 
   for (const model of getArticleModels()) {
-    const draft = await generateWithResponsesApi({
-      apiKey,
-      author,
-      model,
-      postText,
-      postUrl,
-    });
+    const draft =
+      (await generateWithResponsesApi({
+        apiKey,
+        author,
+        model,
+        postText,
+        postUrl,
+      })) ??
+      (await generateWithChatJson({
+        apiKey,
+        author,
+        model,
+        postText,
+        postUrl,
+      }));
 
     if (draft) {
       return draft;
@@ -71,6 +79,70 @@ export async function generateArticleDraftWithOpenAI({
   }
 
   return null;
+}
+
+async function generateWithChatJson({
+  apiKey,
+  author,
+  model,
+  postText,
+  postUrl,
+}: GenerateArticleDraftInput & { apiKey: string; model: string }) {
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${apiKey}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          {
+            role: "system",
+            content: `${buildSystemPrompt()}\n必ずJSONだけを返してください。`,
+          },
+          {
+            role: "user",
+            content: `${buildUserPrompt({ author, postText, postUrl })}\n\nJSON形式: {"title":"...","summary":"...","translation":"...","body":["..."],"imagePrompt":"..."}`,
+          },
+        ],
+        response_format: { type: "json_object" },
+      }),
+    });
+
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      console.error(
+        `OpenAI chat generation failed with ${model}: ${response.status} ${detail.slice(0, 500)}`,
+      );
+      return null;
+    }
+
+    const json = (await response.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    const content = json.choices?.[0]?.message?.content;
+
+    if (!content) {
+      return null;
+    }
+
+    const parsed = JSON.parse(content) as CandidateDraft;
+
+    if (!isValidDraft(parsed)) {
+      return null;
+    }
+
+    return sanitizeDraft(parsed);
+  } catch (error) {
+    console.error(
+      error instanceof Error
+        ? `OpenAI chat generation error with ${model}: ${error.message}`
+        : `OpenAI chat generation error with ${model}.`,
+    );
+    return null;
+  }
 }
 
 async function generateWithResponsesApi({
