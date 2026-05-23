@@ -614,7 +614,6 @@
 
 .candidateEmbedBox {
   overflow: hidden;
-  max-height: 360px;
   border: 1px solid #e4edf1;
   border-radius: 14px;
   background: #f8fbfc;

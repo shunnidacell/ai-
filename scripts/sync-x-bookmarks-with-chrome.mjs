@@ -9,6 +9,7 @@ const adminPassword = process.env.ADMIN_PASSWORD;
 const profileDir = process.env.X_BROWSER_PROFILE ?? ".x-browser-profile";
 const keepOpen = process.env.X_KEEP_OPEN === "1";
 const maxBookmarks = Number(process.env.X_BOOKMARK_LIMIT ?? 30);
+const headless = process.env.X_HEADLESS === "1";
 
 const chromePaths = [
   process.env.CHROME_PATH,
@@ -32,7 +33,7 @@ if (!executablePath) {
 
 const browser = await chromium.launchPersistentContext(profileDir, {
   executablePath,
-  headless: false,
+  headless,
   viewport: { width: 1280, height: 900 },
 });
 
