@@ -4,12 +4,16 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
+await loadDotEnvLocal();
+
 const siteUrl = process.env.SITE_URL ?? "https://ai-3636.onrender.com";
 const adminUser = process.env.ADMIN_USER;
 const adminPassword = process.env.ADMIN_PASSWORD;
 
 if (!adminUser || !adminPassword) {
-  console.error("ADMIN_USER と ADMIN_PASSWORD を環境変数に設定してください。");
+  console.error(
+    "ADMIN_USER と ADMIN_PASSWORD が未設定です。.env.local に保存してください。",
+  );
   process.exit(1);
 }
 
@@ -54,6 +58,48 @@ if (!response.ok) {
 console.log(`${urls.length}件のXブックマークURLを候補へ同期しました。`);
 for (const url of urls) {
   console.log(url);
+}
+
+async function loadDotEnvLocal() {
+  let raw = "";
+
+  try {
+    raw = await readFile(".env.local", "utf8");
+  } catch {
+    return;
+  }
+
+  for (const line of raw.split(/\r?\n/)) {
+    const trimmed = line.trim();
+
+    if (!trimmed || trimmed.startsWith("#")) {
+      continue;
+    }
+
+    const equalIndex = trimmed.indexOf("=");
+
+    if (equalIndex <= 0) {
+      continue;
+    }
+
+    const key = trimmed.slice(0, equalIndex).trim();
+    const value = unquoteEnvValue(trimmed.slice(equalIndex + 1).trim());
+
+    if (!process.env[key]) {
+      process.env[key] = value;
+    }
+  }
+}
+
+function unquoteEnvValue(value) {
+  if (
+    (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
+    return value.slice(1, -1);
+  }
+
+  return value;
 }
 
 function extractXPostUrls(text) {
