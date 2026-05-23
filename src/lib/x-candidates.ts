@@ -214,7 +214,7 @@ export function buildCandidateDraft(candidate: XPostCandidate): CandidateDraft {
       candidate.draftImagePrompt ??
       `Clean editorial AI news image about ${seed.product}, ${seed.domainLabel}, bright technology style, no text.`,
     summary: candidate.draftSummary ?? auto.summary,
-    title: candidate.draftTitle ?? auto.title,
+    title: cleanupGenericTitle(candidate.draftTitle ?? auto.title),
     translation: candidate.draftTranslation ?? seed.translatedText,
   };
 }
@@ -318,7 +318,7 @@ function draftToCandidateFields(draft: CandidateDraft | null) {
     draftBody: draft.body,
     draftImagePrompt: draft.imagePrompt,
     draftSummary: draft.summary,
-    draftTitle: draft.title,
+    draftTitle: cleanupGenericTitle(draft.title),
     draftTranslation: draft.translation,
   };
 }
@@ -391,7 +391,7 @@ export async function updateCandidateDraft(
       draftTitle:
         draft.title === undefined
           ? candidate.draftTitle
-          : draft.title.trim() || undefined,
+          : cleanupGenericTitle(draft.title.trim()) || undefined,
       draftTranslation:
         draft.translation === undefined
           ? candidate.draftTranslation
@@ -483,7 +483,7 @@ function normalizePostText(value?: string) {
 }
 
 function buildArticleSeed(postText: string, author: string): ArticleSeed {
-  const product = extractProductName(postText) ?? `${author}のAIツール`;
+  const product = extractProductName(postText) ?? prettifyAuthor(author);
   const translatedText = translatePostTextForDraft(postText, product);
   const lower = postText.toLowerCase();
   const isOss =
@@ -500,10 +500,10 @@ function buildArticleSeed(postText: string, author: string): ArticleSeed {
       ? "AIセキュリティ監査"
       : lower.includes("agent") || postText.includes("エージェント")
         ? "AIエージェント活用"
-        : "AIツール活用",
+        : inferDomainLabel(postText),
     featureLabel: isSecuritySpecTool
       ? "仕様書に書かれたルールをもとに、実装とのズレを検出する仕組み"
-      : "AIを使った作業の流れを改善する仕組み",
+      : inferFeatureLabel(postText),
     isOss,
     isSecuritySpecTool,
     product,
@@ -514,12 +514,12 @@ function buildArticleSeed(postText: string, author: string): ArticleSeed {
 function buildArticleDraftFromSeed(seed: ArticleSeed, originalPostText: string) {
   const title = seed.isSecuritySpecTool
     ? `コードではなく「仕様書」からバグを探すAI監査ツール、${seed.product}が${seed.action}`
-    : `${seed.product}が${seed.action}、AI活用の新しい選択肢に`;
+    : buildSpecificFallbackTitle(seed, originalPostText);
 
   const summary = [
     `${seed.authorLabel}が、${seed.domainLabel}に関する「${seed.product}」を${seed.action}しました。`,
     `${seed.product}は、${seed.featureLabel}です。`,
-    `${seed.domainLabel}の新しいアプローチとして注目されます。`,
+    `${seed.domainLabel}の実務的な使い方を考えるうえで注目されます。`,
   ].join("\n\n");
 
   const body = seed.isSecuritySpecTool
@@ -530,7 +530,33 @@ function buildArticleDraftFromSeed(seed: ArticleSeed, originalPostText: string) 
     body.splice(3, 0, `原文の要点: ${seed.translatedText}`);
   }
 
-  return { body, summary, title };
+  return { body, summary, title: cleanupGenericTitle(title) };
+}
+
+function buildSpecificFallbackTitle(seed: ArticleSeed, postText: string) {
+  const lower = postText.toLowerCase();
+
+  if (/codex|claude code|cursor/i.test(postText)) {
+    return `${seed.product}関連の開発ワークフローを整理、AIコーディング活用の実例として注目`;
+  }
+
+  if (/chatgpt|gpt/i.test(postText)) {
+    return `${seed.product}の使い方を整理、日常業務や制作で試したいポイント`;
+  }
+
+  if (lower.includes("agent") || postText.includes("エージェント")) {
+    return `${seed.product}でAIエージェント活用を整理、作業自動化の実例として注目`;
+  }
+
+  if (lower.includes("image") || postText.includes("画像")) {
+    return `${seed.product}の画像AI活用を整理、制作ワークフローへの影響に注目`;
+  }
+
+  if (lower.includes("video") || postText.includes("動画")) {
+    return `${seed.product}の動画AI活用を整理、生成ワークフローへの影響に注目`;
+  }
+
+  return `${seed.product}の使い方を整理、${seed.domainLabel}で注目したいポイント`;
 }
 
 function buildSecuritySpecBody(seed: ArticleSeed) {
@@ -574,13 +600,13 @@ function buildGeneralToolBody(seed: ArticleSeed) {
 }
 
 function extractProductName(text: string) {
-  const quoted = text.match(/[「\"]([A-Za-z0-9_.-]{2,40})[」\"]/)?.[1];
+  const quoted = text.match(/[「\"]([A-Za-z0-9_.\-\s]{2,50})[」\"]/)?.[1]?.trim();
   if (quoted) return quoted;
 
-  const known = text.match(/\b(SPECA|Claude Code|Cursor|Codex|Gemini|ChatGPT|GPT-[A-Za-z0-9.-]+)\b/)?.[1];
+  const known = text.match(/\b(SPECA|Claude Code|Cursor|Codex|Gemini|ChatGPT|GPT-[A-Za-z0-9.-]+|Grok|Perplexity|NotebookLM)\b/)?.[1];
   if (known) return known;
 
-  const afterNamed = text.match(/\bcalled\s+([A-Z][A-Za-z0-9_.-]{2,40})\b/i)?.[1];
+  const afterNamed = text.match(/\b(?:called|named|introducing)\s+([A-Z][A-Za-z0-9_.-]{2,40})\b/i)?.[1];
   if (afterNamed) return afterNamed;
 
   const uppercase = text.match(/\b[A-Z][A-Z0-9_.-]{2,20}\b/)?.[0];
@@ -599,6 +625,47 @@ function prettifyAuthor(author: string) {
     .replace(/foundation$/i, " Foundation")
     .replace(/([a-z])([A-Z])/g, "$1 $2")
     .replace(/^nyx foundation$/i, "Nyx Foundation");
+}
+
+function inferDomainLabel(postText: string) {
+  const lower = postText.toLowerCase();
+
+  if (/codex|claude code|cursor|code|開発|コード/i.test(postText)) {
+    return "AIコーディング";
+  }
+  if (lower.includes("image") || postText.includes("画像")) {
+    return "画像生成AI";
+  }
+  if (lower.includes("video") || postText.includes("動画")) {
+    return "動画生成AI";
+  }
+  if (lower.includes("voice") || lower.includes("audio") || postText.includes("音声")) {
+    return "音声AI";
+  }
+  if (lower.includes("research") || postText.includes("調査")) {
+    return "AIリサーチ";
+  }
+
+  return "AIツール活用";
+}
+
+function inferFeatureLabel(postText: string) {
+  const lower = postText.toLowerCase();
+
+  if (/codex|claude code|cursor|code|開発|コード/i.test(postText)) {
+    return "開発作業の調査、実装、修正を進めやすくする仕組み";
+  }
+  if (lower.includes("agent") || postText.includes("エージェント")) {
+    return "AIに複数ステップの作業を任せやすくする仕組み";
+  }
+  if (lower.includes("image") || postText.includes("画像")) {
+    return "画像制作の流れを短縮し、アイデアを形にしやすくする仕組み";
+  }
+  if (lower.includes("video") || postText.includes("動画")) {
+    return "動画制作や生成ワークフローを効率化する仕組み";
+  }
+
+  return "AIを使った作業の流れを改善する仕組み";
 }
 
 function translatePostTextForDraft(postText: string, product: string) {
@@ -634,4 +701,12 @@ function isLikelyEnglish(value: string) {
   const japaneseLetters = value.match(/[ぁ-んァ-ヶ一-龠]/g)?.length ?? 0;
 
   return asciiLetters >= 24 && asciiLetters > japaneseLetters * 2;
+}
+
+function cleanupGenericTitle(title: string) {
+  return title
+    .replace(/、?AI活用の新しい選択肢に/g, "")
+    .replace(/、?AI活用の新たな選択肢に/g, "")
+    .replace(/、?AI活用の新しい可能性に/g, "")
+    .trim();
 }

@@ -15,29 +15,30 @@ const articleDraftSchema = {
     properties: {
       title: {
         type: "string",
-        description: "A natural Japanese news/article title. Do not use generic endings.",
+        description:
+          "A specific Japanese article title based on the post. Never use generic endings.",
       },
       summary: {
         type: "string",
-        description: "Card description in Japanese. 2 to 4 short paragraphs separated by blank lines.",
+        description:
+          "Japanese card description. Use 2 to 4 short paragraphs separated by blank lines.",
       },
       translation: {
         type: "string",
-        description: "Japanese translation or Japanese content memo of the source X post.",
+        description:
+          "Japanese translation for English posts, or a Japanese memo for Japanese posts.",
       },
       body: {
         type: "array",
         minItems: 8,
         maxItems: 18,
-        items: {
-          type: "string",
-        },
+        items: { type: "string" },
         description:
-          "Article paragraphs in Japanese. Use strings beginning with '### ' for section headings.",
+          "Japanese article paragraphs. Use strings beginning with '### ' for section headings.",
       },
       imagePrompt: {
         type: "string",
-        description: "English prompt for a clean editorial AI news image. No text in image.",
+        description: "English prompt for a clean editorial AI news image. No text.",
       },
     },
   },
@@ -72,11 +73,11 @@ export async function generateArticleDraftWithOpenAI({
             content: [
               "あなたは日本語のAIニュースサイト編集者です。",
               "Xポストを読み、一般読者にも分かる自然な記事下書きを作ります。",
-              "英語ポストは必ず自然な日本語に翻訳・要約してから記事化します。",
-              "タイトルは内容固有にしてください。『AI活用の新しい選択肢に』のような汎用句を使わないでください。",
-              "事実を断定しすぎず、元ポストで分かる範囲と確認が必要な範囲を分けてください。",
-              "本文は、冒頭リード、元ポスト下に置く説明、分かりやすい補足、続きを読みたくなる段落、まとめを含めます。",
-              "ポスト本文にない固有情報、価格、日付、性能値、提携情報は作らないでください。",
+              "英語ポストは必ず自然な日本語へ翻訳・要約してから記事化します。",
+              "タイトルは内容固有にしてください。",
+              "絶対に『AI活用の新しい選択肢に』『登場、AI活用の新しい選択肢に』のような汎用タイトルを使わないでください。",
+              "ポスト本文にない価格、日付、性能値、提携、公式発表の事実は作らないでください。",
+              "記事は、冒頭リード、元ポスト下に置く説明、分かりやすい補足、続きを読みたくなる段落、まとめを含めます。",
             ].join("\n"),
           },
           {
@@ -90,11 +91,11 @@ export async function generateArticleDraftWithOpenAI({
               "Xポスト本文:",
               postText,
               "",
-              "出力の条件:",
-              "- title: 記事タイトル。具体的で、ポスト内容を反映する。",
+              "出力条件:",
+              "- title: 具体的な日本語タイトル。内容を読めば何の記事か分かるようにする。",
               "- summary: 記事一覧カード用の説明文。2から4段落。",
-              "- translation: 英語なら日本語訳。日本語なら内容メモ。",
-              "- body: 記事本文。必要なら '### なぜ重要なのか' のような小見出しを入れる。",
+              "- translation: 英語なら自然な日本語訳。日本語なら内容メモ。",
+              "- body: 記事本文。小見出しは '### なぜ重要なのか' のように書く。",
               "- imagePrompt: タイトル画像生成用の英語プロンプト。",
             ].join("\n"),
           },
@@ -107,7 +108,10 @@ export async function generateArticleDraftWithOpenAI({
     });
 
     if (!response.ok) {
-      console.error(`OpenAI article generation failed: ${response.status}`);
+      const detail = await response.text().catch(() => "");
+      console.error(
+        `OpenAI article generation failed: ${response.status} ${detail.slice(0, 500)}`,
+      );
       return null;
     }
 
@@ -133,13 +137,7 @@ export async function generateArticleDraftWithOpenAI({
       return null;
     }
 
-    return {
-      body: parsed.body.map((paragraph) => paragraph.trim()).filter(Boolean),
-      imagePrompt: parsed.imagePrompt.trim(),
-      summary: parsed.summary.trim(),
-      title: parsed.title.trim(),
-      translation: parsed.translation.trim(),
-    };
+    return sanitizeDraft(parsed);
   } catch (error) {
     console.error(
       error instanceof Error
@@ -148,4 +146,22 @@ export async function generateArticleDraftWithOpenAI({
     );
     return null;
   }
+}
+
+function sanitizeDraft(draft: CandidateDraft): CandidateDraft {
+  return {
+    body: draft.body.map((paragraph) => paragraph.trim()).filter(Boolean),
+    imagePrompt: draft.imagePrompt.trim(),
+    summary: draft.summary.trim(),
+    title: removeGenericTitleEnding(draft.title.trim()),
+    translation: draft.translation.trim(),
+  };
+}
+
+function removeGenericTitleEnding(title: string) {
+  return title
+    .replace(/、?AI活用の新しい選択肢に/g, "")
+    .replace(/、?AI活用の新たな選択肢に/g, "")
+    .replace(/、?AI活用の新しい可能性に/g, "")
+    .trim();
 }
