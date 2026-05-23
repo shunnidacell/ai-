@@ -40,13 +40,13 @@ export default async function CandidatesPage() {
       <section className="panel bookmarkIntakePanel compactPanel">
         <div className="panelHeader">
           <div>
-            <p className="adminKicker">Xブックマーク</p>
-            <h1>ブックマークしたポストから選ぶ</h1>
+            <p className="adminKicker">X&#12502;&#12483;&#12463;&#12510;&#12540;&#12463;</p>
+            <h1>&#12502;&#12483;&#12463;&#12510;&#12540;&#12463;&#12375;&#12383;&#12509;&#12473;&#12488;&#12363;&#12425;&#36984;&#12406;</h1>
             <p>
-              Xでブックマークした中から記事化したいポストだけを選び、URLを貼って候補に追加します。
+              X&#12391;&#12502;&#12483;&#12463;&#12510;&#12540;&#12463;&#12375;&#12383;&#20013;&#12363;&#12425;&#35352;&#20107;&#21270;&#12375;&#12383;&#12356;&#12509;&#12473;&#12488;&#12384;&#12369;&#12434;&#36984;&#12403;&#12289;URL&#12434;&#36028;&#12387;&#12390;&#20505;&#35036;&#12395;&#36861;&#21152;&#12375;&#12414;&#12377;&#12290;
             </p>
             <p>
-              自動同期はPCで <code>npm run sync:bookmarks:chrome</code> を実行します。
+              &#33258;&#21205;&#21516;&#26399;&#12399;PC&#12391; <code>npm run sync:bookmarks:chrome</code> &#12434;&#23455;&#34892;&#12375;&#12414;&#12377;&#12290;
             </p>
           </div>
         </div>
@@ -56,15 +56,15 @@ export default async function CandidatesPage() {
       <section className="panel candidatesPanel compactPanel">
         <div className="panelHeader">
           <div>
-            <p className="adminKicker">記事候補</p>
-            <h1>確認待ちの記事候補</h1>
-            <p>{reviewCandidates.length}件の候補があります。</p>
+            <p className="adminKicker">&#35352;&#20107;&#20505;&#35036;</p>
+            <h1>&#30906;&#35469;&#24453;&#12385;&#12398;&#35352;&#20107;&#20505;&#35036;</h1>
+            <p>{reviewCandidates.length}&#20214;&#12398;&#20505;&#35036;&#12364;&#12354;&#12426;&#12414;&#12377;&#12290;</p>
           </div>
           <CollectWithHermesButton />
         </div>
         <div className="candidateCompactList">
           {reviewCandidates.length === 0 ? (
-            <p className="emptyState">確認待ちの記事候補はありません。</p>
+            <p className="emptyState">&#30906;&#35469;&#24453;&#12385;&#12398;&#35352;&#20107;&#20505;&#35036;&#12399;&#12354;&#12426;&#12414;&#12379;&#12435;&#12290;</p>
           ) : (
             reviewCandidates.map((candidate) => (
               <CandidateCompactCard candidate={candidate} key={candidate.id} />
@@ -76,13 +76,13 @@ export default async function CandidatesPage() {
       <section className="panel candidatesPanel deletedItemsPanel compactPanel">
         <div className="panelHeader">
           <div>
-            <p className="adminKicker">削除済み</p>
-            <h1>削除した下書き</h1>
+            <p className="adminKicker">&#21066;&#38500;&#28168;&#12415;</p>
+            <h1>&#21066;&#38500;&#12375;&#12383;&#19979;&#26360;&#12365;</h1>
           </div>
         </div>
         <div className="deletedItemList compactDeletedList">
           {deletedCandidates.length === 0 ? (
-            <p className="emptyState">削除した下書きはありません。</p>
+            <p className="emptyState">&#21066;&#38500;&#12375;&#12383;&#19979;&#26360;&#12365;&#12399;&#12354;&#12426;&#12414;&#12379;&#12435;&#12290;</p>
           ) : (
             deletedCandidates.map((candidate) => {
               const draft = buildCandidateDraft(candidate);
@@ -118,7 +118,7 @@ function CandidateCompactCard({
           <strong>{candidate.author}</strong>
           <span>{candidate.decision ?? "draft"}</span>
           <a href={candidate.url} target="_blank" rel="noreferrer">
-            Xで開く
+            X&#12391;&#38283;&#12367;
             <ArrowUpRight size={14} />
           </a>
         </div>
@@ -143,7 +143,7 @@ function CandidateCompactCard({
       </div>
 
       <details className="candidateEditDetails">
-        <summary>編集を開く</summary>
+        <summary>&#32232;&#38598;&#12434;&#38283;&#12367;</summary>
         <CandidateEditForm
           draft={draft}
           id={candidate.id}
