@@ -56,10 +56,36 @@ export async function generateArticleDraftWithOpenAI({
     return null;
   }
 
-  const model = process.env.OPENAI_ARTICLE_MODEL ?? "gpt-5.5";
+  const models = getArticleModels();
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    for (const model of models) {
+      const draft = await generateWithModel({ apiKey, author, model, postText, postUrl });
+
+      if (draft) {
+        return draft;
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error(
+      error instanceof Error
+        ? `OpenAI article generation error: ${error.message}`
+        : "OpenAI article generation error.",
+    );
+    return null;
+  }
+}
+
+async function generateWithModel({
+  apiKey,
+  author,
+  model,
+  postText,
+  postUrl,
+}: GenerateArticleDraftInput & { apiKey: string; model: string }) {
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         authorization: `Bearer ${apiKey}`,
@@ -105,47 +131,52 @@ export async function generateArticleDraftWithOpenAI({
           json_schema: articleDraftSchema,
         },
       }),
-    });
+  });
 
-    if (!response.ok) {
-      const detail = await response.text().catch(() => "");
-      console.error(
-        `OpenAI article generation failed: ${response.status} ${detail.slice(0, 500)}`,
-      );
-      return null;
-    }
-
-    const json = (await response.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-    };
-    const content = json.choices?.[0]?.message?.content;
-
-    if (!content) {
-      return null;
-    }
-
-    const parsed = JSON.parse(content) as CandidateDraft;
-
-    if (
-      !parsed.title ||
-      !parsed.summary ||
-      !parsed.translation ||
-      !Array.isArray(parsed.body) ||
-      parsed.body.length === 0 ||
-      !parsed.imagePrompt
-    ) {
-      return null;
-    }
-
-    return sanitizeDraft(parsed);
-  } catch (error) {
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
     console.error(
-      error instanceof Error
-        ? `OpenAI article generation error: ${error.message}`
-        : "OpenAI article generation error.",
+      `OpenAI article generation failed with ${model}: ${response.status} ${detail.slice(0, 500)}`,
     );
     return null;
   }
+
+  const json = (await response.json()) as {
+    choices?: Array<{ message?: { content?: string } }>;
+  };
+  const content = json.choices?.[0]?.message?.content;
+
+  if (!content) {
+    return null;
+  }
+
+  const parsed = JSON.parse(content) as CandidateDraft;
+
+  if (
+    !parsed.title ||
+    !parsed.summary ||
+    !parsed.translation ||
+    !Array.isArray(parsed.body) ||
+    parsed.body.length === 0 ||
+    !parsed.imagePrompt
+  ) {
+    return null;
+  }
+
+  return sanitizeDraft(parsed);
+}
+
+function getArticleModels() {
+  const configured = process.env.OPENAI_ARTICLE_MODEL
+    ?.split(",")
+    .map((model) => model.trim())
+    .filter(Boolean);
+
+  if (configured?.length) {
+    return configured;
+  }
+
+  return ["gpt-5.5", "gpt-5.4", "gpt-5.4-mini", "gpt-5.2", "gpt-5.1", "gpt-4.1"];
 }
 
 function sanitizeDraft(draft: CandidateDraft): CandidateDraft {
