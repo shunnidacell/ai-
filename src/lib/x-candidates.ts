@@ -170,7 +170,8 @@ export function classifyCandidate(author: string) {
 
 export function buildCandidateDraft(candidate: XPostCandidate): CandidateDraft {
   const postText = normalizePostText(candidate.postText);
-  const topic = extractTopic(postText, candidate.author);
+  const translatedPostText = translatePostTextForDraft(postText);
+  const topic = extractTopic(translatedPostText ?? postText, candidate.author);
 
   if (!postText) {
     return {
@@ -197,13 +198,13 @@ export function buildCandidateDraft(candidate: XPostCandidate): CandidateDraft {
   return {
     body: candidate.draftBody?.length
       ? candidate.draftBody
-      : buildBodyFromPost(postText, candidate.author),
+      : buildBodyFromPost(translatedPostText ?? postText, candidate.author, postText),
     imagePrompt:
       candidate.draftImagePrompt ??
       `Clean editorial AI news image about ${topic}, bright technology style, no text.`,
-    summary: candidate.draftSummary ?? buildSummary(postText),
+    summary: candidate.draftSummary ?? buildSummary(translatedPostText ?? postText),
     title: candidate.draftTitle ?? buildTitle(topic),
-    translation: candidate.draftTranslation ?? postText,
+    translation: candidate.draftTranslation ?? translatedPostText ?? postText,
   };
 }
 
@@ -415,7 +416,7 @@ function buildTitle(topic: string) {
     .replace(/^これは/, "")
     .trim();
 
-  return `${cleanTopic}を解説`;
+  return cleanTopic;
 }
 
 function buildSummary(postText: string) {
@@ -423,11 +424,74 @@ function buildSummary(postText: string) {
   return `Xで注目したポストをもとに、内容と使いどころを整理します。${summary}`;
 }
 
-function buildBodyFromPost(postText: string, author: string) {
-  return [
+function buildBodyFromPost(postText: string, author: string, originalPostText?: string) {
+  const body = [
     `${author} のXポストで紹介されていた内容をもとに、ポイントを整理します。`,
     postText,
+  ];
+
+  if (originalPostText && originalPostText !== postText) {
+    body.push(`原文メモ: ${originalPostText}`);
+  }
+
+  body.push(
     "このポストは、AIツールやAI活用の実践に関する情報として候補に追加されました。公開前に、紹介されているツール名、手順、効果、注意点が事実と合っているか確認してください。",
     "記事化する場合は、読者がすぐ試せるように、何ができるのか、どんな人に向いているのか、導入時の注意点を補足すると読みやすくなります。",
-  ];
+  );
+
+  return body;
+}
+
+function translatePostTextForDraft(postText?: string) {
+  if (!postText || !isLikelyEnglish(postText)) {
+    return postText;
+  }
+
+  return roughTranslateEnglishPost(postText);
+}
+
+function isLikelyEnglish(value: string) {
+  const asciiLetters = value.match(/[A-Za-z]/g)?.length ?? 0;
+  const japaneseLetters = value.match(/[ぁ-んァ-ヶ一-龠]/g)?.length ?? 0;
+
+  return asciiLetters >= 24 && asciiLetters > japaneseLetters * 2;
+}
+
+function roughTranslateEnglishPost(value: string) {
+  const normalized = value
+    .replace(/\bAI\b/g, "AI")
+    .replace(/\bagent(s)?\b/gi, "AIエージェント")
+    .replace(/\bmodel(s)?\b/gi, "モデル")
+    .replace(/\bopen source\b/gi, "オープンソース")
+    .replace(/\bworkflow(s)?\b/gi, "ワークフロー")
+    .replace(/\bAPI(s)?\b/g, "API")
+    .replace(/\bdeveloper(s)?\b/gi, "開発者")
+    .replace(/\brelease(d|s)?\b/gi, "リリース")
+    .replace(/\blaunched\b/gi, "公開")
+    .replace(/\bintroducing\b/gi, "紹介")
+    .replace(/\bavailable\b/gi, "利用可能")
+    .replace(/\bnew\b/gi, "新しい")
+    .replace(/\bfree\b/gi, "無料")
+    .replace(/\blocal\b/gi, "ローカル")
+    .replace(/\bfast(er)?\b/gi, "高速")
+    .replace(/\btool(s)?\b/gi, "ツール")
+    .replace(/\bcode\b/gi, "コード")
+    .replace(/\buse\b/gi, "使う")
+    .replace(/\bcan\b/gi, "できる")
+    .replace(/\bwith\b/gi, "で")
+    .replace(/\bfor\b/gi, "向け")
+    .replace(/\band\b/gi, "と")
+    .replace(/\bto\b/gi, "へ")
+    .replace(/\bis\b/gi, "は")
+    .replace(/\bare\b/gi, "は")
+    .replace(/\bthe\b/gi, "")
+    .replace(/\ba\b/gi, "")
+    .replace(/\ban\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return [
+    "英語ポストの内容を日本語向けに整理しました。",
+    normalized,
+  ].join(" ");
 }

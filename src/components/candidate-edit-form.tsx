@@ -50,7 +50,7 @@ export function CandidateEditForm({
       </label>
       <label>
         タイトル画像URL
-        <input name="imageOverride" placeholder="いまは未使用。必要になったら入力" />
+        <input name="imageOverride" placeholder="必要になったら入力" />
       </label>
       <label>
         Xポスト画像URL
@@ -65,7 +65,7 @@ export function CandidateEditForm({
         <textarea defaultValue={draft.summary} name="summary" rows={3} />
       </label>
       <label>
-        ポスト内容メモ
+        翻訳・内容メモ
         <textarea defaultValue={draft.translation} name="translation" rows={4} />
       </label>
       <label>

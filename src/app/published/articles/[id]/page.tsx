@@ -44,7 +44,7 @@ export default async function PublishedArticleAdminPage({
             <div className="articleHeroText">
               <span className="badge">{staticArticle.category}</span>
               <p>
-                {staticArticle.source} ・ {staticArticle.date}
+                {staticArticle.source} / {staticArticle.date}
               </p>
               <p className="imageCredit">{staticArticle.imageSource}</p>
               <h1>{staticArticle.title}</h1>
@@ -122,10 +122,10 @@ export default async function PublishedArticleAdminPage({
           <div className="articleHeroOverlay" />
           <div className="articleHeroText">
             <span className="badge">
-              {candidate.decision === "headline" ? "見出し" : "公開"}
+              {candidate.decision === "headline" ? "見出し" : "公開記事"}
             </span>
             <p>
-              {candidate.author} ・ {date}
+              {candidate.author} / {date}
             </p>
             <h1>{draft.title}</h1>
           </div>

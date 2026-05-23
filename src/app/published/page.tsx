@@ -168,14 +168,12 @@ export default async function PublishedPage() {
         </div>
       </section>
 
-      <section className="panel deletedItemsPanel">
-        <div className="panelHeader">
-          <div>
-            <p className="adminKicker">非公開</p>
-            <h1>非公開にした記事</h1>
-          </div>
+      <section className="adminStateSection">
+        <div className="simpleSectionHead">
+          <h2>非公開にした記事</h2>
+          <p>公開サイトには出ません。内容を直して再公開するか、不要なら削除できます。</p>
         </div>
-        <div className="deletedItemList">
+        <div className="adminStateGrid">
           {hiddenCandidateArticles.length === 0 &&
           hiddenStaticArticles.length === 0 ? (
             <p className="emptyState">非公開にした記事はありません。</p>
@@ -184,12 +182,13 @@ export default async function PublishedPage() {
               {hiddenCandidateArticles.map((candidate) => {
                 const draft = buildCandidateDraft(candidate);
                 return (
-                  <article className="deletedItemCard" key={candidate.id}>
+                  <article className="adminStateCard" key={candidate.id}>
                     <Link href={`/published/articles/${candidate.id}`}>
+                      <span>X候補</span>
                       <strong>{draft.title}</strong>
                     </Link>
                     <p>
-                      {candidate.author} / {candidate.decidedAt}
+                      {candidate.author} / {formatCandidateDate(candidate.decidedAt ?? candidate.createdAt)}
                     </p>
                     <div className="candidatePublicActions">
                       <CandidateDecisionButtons
@@ -207,8 +206,9 @@ export default async function PublishedPage() {
                 );
               })}
               {hiddenStaticArticles.map((article) => (
-                <article className="deletedItemCard" key={article.id}>
+                <article className="adminStateCard" key={article.id}>
                   <Link href={`/published/articles/${article.id}`}>
+                    <span>固定記事</span>
                     <strong>{article.title}</strong>
                   </Link>
                   <p>
@@ -222,14 +222,12 @@ export default async function PublishedPage() {
         </div>
       </section>
 
-      <section className="panel deletedItemsPanel">
-        <div className="panelHeader">
-          <div>
-            <p className="adminKicker">削除済み</p>
-            <h1>削除した公開記事</h1>
-          </div>
+      <section className="adminStateSection dangerStateSection">
+        <div className="simpleSectionHead">
+          <h2>削除した公開記事</h2>
+          <p>復元できます。完全に不要になったものだけ完全削除してください。</p>
         </div>
-        <div className="deletedItemList">
+        <div className="adminStateGrid">
           {deletedCandidateArticles.length === 0 &&
           deletedStaticArticles.length === 0 ? (
             <p className="emptyState">削除した公開記事はありません。</p>
@@ -238,7 +236,7 @@ export default async function PublishedPage() {
               {deletedCandidateArticles.map((candidate) => {
                 const draft = buildCandidateDraft(candidate);
                 return (
-                  <article className="deletedItemCard" key={candidate.id}>
+                  <article className="adminStateCard" key={candidate.id}>
                     <strong>{draft.title}</strong>
                     <p>
                       {candidate.author} / {candidate.deletedAt}
@@ -248,7 +246,7 @@ export default async function PublishedPage() {
                 );
               })}
               {deletedStaticArticles.map((article) => (
-                <article className="deletedItemCard" key={article.id}>
+                <article className="adminStateCard" key={article.id}>
                   <strong>{article.title}</strong>
                   <p>
                     {article.source} / {article.date}
