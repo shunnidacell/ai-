@@ -57,65 +57,6 @@ const developerAccounts = new Set([
 const storePath = path.join(process.cwd(), "data", "x-post-candidates.json");
 const storeKey = "x-post-candidates";
 
-const knownDrafts: Record<string, CandidateDraft> = {
-  "2021397952791707696": {
-    title: "Anthropic、Claude Opus 4.6のシステムカードを公開",
-    translation:
-      "AnthropicはClaude Opus 4.6のシステムカードを公開し、同モデルをASL-3 Standardへ移行したと説明しています。",
-    summary:
-      "Claude Opus 4.6の安全性評価と運用上の注意点を確認できる一次情報です。",
-    body: [
-      "Anthropicは公式Xで、Claude Opus 4.6のシステムカード公開を告知しました。",
-      "システムカードは、モデルの安全性評価、リスク管理、利用制限を確認するための重要な一次情報です。",
-      "企業や開発者は、性能だけでなく導入時の安全性や利用条件を確認する必要があります。",
-    ],
-    imagePrompt:
-      "Dark editorial hero image about AI safety evaluation and model system cards, no text.",
-  },
-  "2025997928242811253": {
-    title: "Anthropic、モデル蒸留攻撃と防御手法の研究を公開",
-    translation:
-      "Anthropicはモデル蒸留攻撃と、その対策技術に関する研究を公開したと説明しています。",
-    summary:
-      "商用AIモデルの保護とAPI運用に関わるセキュリティ研究です。",
-    body: [
-      "Anthropicは公式Xで、モデル蒸留攻撃と防御手法に関する研究を公開したと告知しました。",
-      "モデル蒸留攻撃は、対象モデルの出力を利用して似た振る舞いをする別モデルを作るリスクにつながります。",
-      "AI事業者にとって、モデル保護とAPI利用制限の設計がより重要になります。",
-    ],
-    imagePrompt:
-      "Dark editorial hero image about AI security research and model extraction defense, no text.",
-  },
-  "2036836242076188816": {
-    title: "Google AI、Lyria 3 ProをAI Pro/Ultra向けに展開",
-    translation:
-      "Google AIは、Lyria 3 ProがGoogle AI ProとUltraで利用できると案内しています。",
-    summary:
-      "生成AIの活用領域が音楽制作にも広がっていることを示す更新です。",
-    body: [
-      "Google AIは公式Xで、Lyria 3 ProがGoogle AI ProとUltraで利用可能になったと案内しました。",
-      "Lyriaは音楽生成に関わるGoogleのAI技術です。",
-      "クリエイター向けAIの拡大と、商用利用時の権利確認が今後の論点になります。",
-    ],
-    imagePrompt:
-      "Dark editorial hero image about generative music AI and waveform interface, no text.",
-  },
-  "2011484983391559697": {
-    title: "Perplexity、BlueMatrixとの提携を発表",
-    translation:
-      "PerplexityはBlueMatrixとの提携を公式Xで発表しています。",
-    summary:
-      "AI検索・調査領域での企業連携として注目されるニュースです。",
-    body: [
-      "Perplexityは公式Xで、BlueMatrixとの提携を発表しました。",
-      "AI検索や調査支援の領域では、企業向けデータやワークフロー連携が重要になっています。",
-      "今回の提携がどの機能や利用者層に影響するか、公式情報をもとに確認する必要があります。",
-    ],
-    imagePrompt:
-      "Dark editorial hero image about AI search partnerships and enterprise intelligence, no text.",
-  },
-};
-
 export async function readCandidates() {
   const dbCandidates = await readJsonFromDb<XPostCandidate[]>(storeKey);
 
@@ -202,7 +143,7 @@ export function classifyCandidate(author: string) {
   if (officialAccounts.has(author)) {
     return {
       articleWorthy: true,
-      reason: "Official account post. Ready for article review.",
+      reason: "公式アカウントのポストです。内容を確認して記事化できます。",
       sourceType: "official" as const,
     };
   }
@@ -210,48 +151,49 @@ export function classifyCandidate(author: string) {
   if (developerAccounts.has(author)) {
     return {
       articleWorthy: true,
-      reason: "Developer or semi-official account post. Ready for article review.",
+      reason: "開発者または関連アカウントのポストです。内容を確認して記事化できます。",
       sourceType: "developer" as const,
     };
   }
 
   return {
     articleWorthy: true,
-    reason:
-      "Individual or unknown account. Review as a practical Japanese AI post before publishing.",
+    reason: "個人または未分類アカウントです。実用性やニュース性を確認してから公開してください。",
     sourceType: "unknown" as const,
   };
 }
 
 export function buildCandidateDraft(candidate: XPostCandidate): CandidateDraft {
-  const draft =
-    knownDrafts[candidate.statusId] ?? {
-      title: `${candidate.author}の公式ポストを確認`,
-      translation:
-        "このポストはまだ本文取得と翻訳が完了していません。X埋め込みを確認してから公開判断してください。",
-      summary:
-        "公式のXポストURLは登録済みです。公開前に内容確認と本文編集が必要です。",
-      body: [
-        "この候補はXポストURLから登録されました。",
-        "本文取得と事実確認がまだ完了していないため、公開前に公式情報の内容を確認してください。",
-      ],
-      imagePrompt:
-        "Dark editorial hero image for AI industry news, no text, no logos.",
-    };
+  const postText = candidate.postText?.trim();
+  const fallbackTitle = `${candidate.author}のXポストから記事候補を作成`;
+  const fallbackSummary =
+    "登録されたXポストをもとにした記事候補です。公開前に本文、事実関係、画像を確認してください。";
+  const fallbackBody = [
+    postText
+      ? `登録されたポストでは、${postText}`
+      : "この候補は、管理画面で登録されたXポストURLから作成されています。",
+    "公開する前に、ポスト本文、関連情報、日付、画像が正しいかを確認してください。",
+    "必要に応じてタイトルや本文を編集し、読者にとって分かりやすい記事に整えてから公開します。",
+  ];
 
   return {
-    ...draft,
-    body: candidate.draftBody?.length ? candidate.draftBody : draft.body,
-    imagePrompt: candidate.draftImagePrompt ?? draft.imagePrompt,
-    summary: candidate.draftSummary ?? draft.summary,
-    title: candidate.draftTitle ?? draft.title,
-    translation: candidate.draftTranslation ?? draft.translation,
+    body: candidate.draftBody?.length ? candidate.draftBody : fallbackBody,
+    imagePrompt:
+      candidate.draftImagePrompt ??
+      "Clean editorial AI news image based on the article title, bright technology style, no text.",
+    summary: candidate.draftSummary ?? fallbackSummary,
+    title: candidate.draftTitle ?? fallbackTitle,
+    translation:
+      candidate.draftTranslation ??
+      postText ??
+      "ポスト本文はまだ登録されていません。管理画面で本文を補完してください。",
   };
 }
 
 export function getCandidateImage(candidate: XPostCandidate) {
   return (
     candidate.imageOverride ??
+    candidate.postImageUrl ??
     `/api/x-candidates/${encodeURIComponent(candidate.id)}/image.svg`
   );
 }
@@ -305,8 +247,9 @@ export async function updateCandidateDecision(
     const headlines = sortCandidatesByNewest(
       next.filter((candidate) => candidate.decision === "headline"),
     );
-    const overflowHeadlines = headlines.slice(5);
-    const overflowIds = new Set(overflowHeadlines.map((candidate) => candidate.id));
+    const overflowIds = new Set(
+      headlines.slice(5).map((candidate) => candidate.id),
+    );
 
     next = next.map((candidate) =>
       overflowIds.has(candidate.id)

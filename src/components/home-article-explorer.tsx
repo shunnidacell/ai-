@@ -1,8 +1,5 @@
-"use client";
-
 import Image from "next/image";
-import { X, ExternalLink } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 
 export type HomeExplorerPost = {
   author: string;
@@ -35,174 +32,57 @@ export function HomeArticleExplorer({
   articles: HomeExplorerArticle[];
   hero: HomeExplorerArticle;
 }) {
-  const [openId, setOpenId] = useState<string | null>(null);
-  const allArticles = useMemo(() => [hero, ...articles], [articles, hero]);
-  const activeArticle = allArticles.find((article) => article.id === openId);
-
-  useEffect(() => {
-    if (!openId) {
-      return;
-    }
-
-    const original = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = original;
-    };
-  }, [openId]);
-
-  useEffect(() => {
-    function closeOnEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setOpenId(null);
-      }
-    }
-
-    window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
-  }, []);
-
   return (
     <>
-      <button
-        className="heroCard hasHeroImage articleOpenButton"
-        onClick={() => setOpenId(hero.id)}
-        type="button"
-      >
-        <div
-          aria-hidden="true"
-          className="heroFixedBg"
-          style={{ backgroundImage: `url(${hero.image})` }}
-        />
-        <div className="heroOverlay" />
-        <div className="heroContent">
-          <span className="badge">{hero.label}</span>
+      <section className="simpleHero">
+        <div className="simpleHeroText">
+          <span>{hero.label}</span>
           <h1>{hero.title}</h1>
           <p>{hero.excerpt}</p>
-          <p className="sourceLine">
-            <span className="sourceAvatar">{hero.source.slice(0, 1)}</span>
-            {hero.source} ・ {hero.date} ・ AIニュース
-          </p>
-          <span className="heroCta">記事を開く</span>
+          <Link href={`/articles/${hero.id}`}>記事を読む</Link>
         </div>
-        <div className="heroVisual" aria-hidden="true">
+        <Link className="simpleHeroImage" href={`/articles/${hero.id}`}>
           <Image
-            src={hero.image}
             alt=""
             fill
             priority
-            sizes="(max-width: 720px) 90vw, 48vw"
+            sizes="(max-width: 760px) 100vw, 46vw"
+            src={hero.image}
           />
-        </div>
-        <div className="sliderDots" aria-hidden="true">
-          <span className="current" />
-          <span />
-          <span />
-          <span />
-        </div>
-      </button>
+        </Link>
+      </section>
 
-      <div className="homeContentLayout">
-        <section className="homeArticleGrid" aria-label="記事一覧">
+      <section className="simpleArticleSection">
+        <div className="simpleSectionHead">
+          <h2>記事一覧</h2>
+          <p>ブックマークしたXポストから選んだ記事候補を、確認して公開していくためのシンプルな一覧です。</p>
+        </div>
+
+        <div className="simpleArticleGrid">
           {articles.map((article) => (
-            <button
-              className="homeArticleCard articleOpenButton"
-              key={`${article.id}-${article.label}`}
-              onClick={() => setOpenId(article.id)}
-              type="button"
+            <Link
+              className="simpleArticleCard"
+              href={`/articles/${article.id}`}
+              key={article.id}
             >
-              <div className="homeArticleImage">
+              <div className="simpleArticleImage">
                 <Image
-                  src={article.image}
                   alt=""
                   fill
-                  sizes="(max-width: 720px) 100vw, (max-width: 1180px) 45vw, 260px"
+                  sizes="(max-width: 760px) 100vw, (max-width: 1180px) 45vw, 320px"
+                  src={article.image}
                 />
-                <span>{article.label}</span>
               </div>
-              <h2>{article.title}</h2>
-              <p>
-                <span>□</span>
-                {article.date}
-              </p>
-            </button>
+              <span>{article.label}</span>
+              <h3>{article.title}</h3>
+              <p>{article.excerpt}</p>
+              <small>
+                {article.source} / {article.date}
+              </small>
+            </Link>
           ))}
-        </section>
-      </div>
-
-      {activeArticle && (
-        <div
-          className="articleExpandOverlay"
-          onClick={() => setOpenId(null)}
-          role="presentation"
-        >
-          <article
-            aria-modal="true"
-            className="articleExpandSheet"
-            onClick={(event) => event.stopPropagation()}
-            role="dialog"
-          >
-            <button
-              aria-label="記事を閉じる"
-              className="articleExpandClose"
-              onClick={() => setOpenId(null)}
-              type="button"
-            >
-              <X size={20} />
-            </button>
-
-            <div className="articleExpandHero">
-              <Image
-                src={activeArticle.image}
-                alt=""
-                fill
-                sizes="(max-width: 720px) 100vw, 940px"
-              />
-              <div className="articleExpandHeroShade" />
-              <div className="articleExpandTitle">
-                <span className="badge">{activeArticle.label}</span>
-                <h1>{activeArticle.title}</h1>
-                <p>
-                  {activeArticle.source} ・ {activeArticle.date}
-                </p>
-              </div>
-            </div>
-
-            <div className="articleExpandBody">
-              <section className="articleExpandMain">
-                <p className="articleExpandLead">{activeArticle.excerpt}</p>
-                {activeArticle.body.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
-                ))}
-              </section>
-
-              <aside className="articleExpandPosts">
-                <h2>関連するポスト</h2>
-                <div className="articleExpandPostStack">
-                  {[activeArticle.featuredPost, ...activeArticle.relatedPosts]
-                    .filter((post): post is HomeExplorerPost => Boolean(post))
-                    .map((post) => (
-                      <a
-                        className="articleExpandPost"
-                        href={post.url}
-                        key={post.url}
-                        rel="noreferrer"
-                        target="_blank"
-                      >
-                        <span>{post.newsValue}</span>
-                        <strong>{post.author}</strong>
-                        <p>{post.body}</p>
-                        <small>
-                          Xで開く <ExternalLink size={12} />
-                        </small>
-                      </a>
-                    ))}
-                </div>
-              </aside>
-            </div>
-          </article>
         </div>
-      )}
+      </section>
     </>
   );
 }

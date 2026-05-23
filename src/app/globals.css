@@ -12,6 +12,319 @@
   --hot: #ff7a45;
 }
 
+/* Simple public site mode: keep automation/admin code, simplify the visible site. */
+.simpleSiteShell {
+  width: min(1120px, calc(100% - 40px));
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: 26px 0 44px;
+  color: #10203f;
+}
+
+.simpleSiteShell .siteHeader {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(240px, 360px);
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.simpleSiteShell .brand {
+  color: #10203f;
+}
+
+.simpleSiteShell .brandIcon {
+  background: linear-gradient(135deg, #6c63ff, #74c7e8);
+  box-shadow: 0 14px 34px rgba(108, 99, 255, 0.22);
+}
+
+.simpleSiteShell .brand small {
+  color: #66718a;
+}
+
+.simpleSiteShell .searchBox {
+  height: 44px;
+  border: 1px solid #dce4f2;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.84);
+  color: #66718a;
+}
+
+.simpleSiteShell .searchBox input {
+  color: #10203f;
+}
+
+.simpleHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
+  gap: 28px;
+  align-items: stretch;
+  border: 1px solid #dfe7f4;
+  border-radius: 20px;
+  padding: 28px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 22px 60px rgba(74, 90, 120, 0.12);
+}
+
+.simpleHeroText {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 320px;
+}
+
+.simpleHeroText span,
+.simpleArticleCard span,
+.simpleArticleHeroText span,
+.simpleSourcePanel a span {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: #eef2ff;
+  color: #5b55d6;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.simpleHeroText h1 {
+  margin-top: 18px;
+  color: #10203f;
+  font-size: clamp(34px, 5vw, 58px);
+  line-height: 1.18;
+}
+
+.simpleHeroText p {
+  max-width: 620px;
+  margin-top: 16px;
+  color: #58667f;
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+.simpleHeroText a,
+.simpleBackLink {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 22px;
+  border-radius: 999px;
+  padding: 11px 18px;
+  background: #10203f;
+  color: white;
+  font-weight: 900;
+}
+
+.simpleHeroImage,
+.simpleArticleImage,
+.simpleArticleHeroImage {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #edf3ff;
+}
+
+.simpleHeroImage {
+  min-height: 320px;
+}
+
+.simpleHeroImage img,
+.simpleArticleImage img,
+.simpleArticleHeroImage img {
+  object-fit: cover;
+}
+
+.simpleArticleSection {
+  margin-top: 34px;
+}
+
+.simpleSectionHead {
+  margin-bottom: 18px;
+}
+
+.simpleSectionHead h2 {
+  color: #10203f;
+  font-size: 26px;
+}
+
+.simpleSectionHead p {
+  margin-top: 8px;
+  color: #66718a;
+  line-height: 1.7;
+}
+
+.simpleArticleGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.simpleArticleCard {
+  display: grid;
+  gap: 12px;
+  border: 1px solid #dfe7f4;
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 18px 44px rgba(74, 90, 120, 0.1);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.simpleArticleCard:hover {
+  box-shadow: 0 22px 54px rgba(74, 90, 120, 0.14);
+  transform: translateY(-2px);
+}
+
+.simpleArticleImage {
+  aspect-ratio: 16 / 9;
+}
+
+.simpleArticleCard h3 {
+  color: #10203f;
+  font-size: 18px;
+  line-height: 1.45;
+}
+
+.simpleArticleCard p,
+.simpleArticleCard small {
+  color: #66718a;
+  line-height: 1.65;
+}
+
+.simpleArticlePage {
+  display: grid;
+  gap: 24px;
+}
+
+.simpleArticleHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  gap: 28px;
+  align-items: stretch;
+  border-bottom: 1px solid #dfe7f4;
+  padding-bottom: 30px;
+}
+
+.simpleArticleHeroText {
+  display: grid;
+  align-content: center;
+  gap: 14px;
+}
+
+.simpleArticleHeroText h1 {
+  color: #10203f;
+  font-size: clamp(34px, 5vw, 58px);
+  line-height: 1.18;
+}
+
+.simpleArticleHeroText p,
+.simpleArticleHeroText small {
+  color: #58667f;
+  line-height: 1.8;
+}
+
+.simpleArticleHeroImage {
+  min-height: 300px;
+}
+
+.simpleArticleBody {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 34px;
+  align-items: start;
+}
+
+.simpleArticleCopy {
+  display: grid;
+  gap: 20px;
+}
+
+.simpleArticleCopy p {
+  color: #263956;
+  font-size: 17px;
+  line-height: 2;
+}
+
+.simpleSourcePanel {
+  position: sticky;
+  top: 24px;
+  display: grid;
+  gap: 12px;
+  border: 1px solid #dfe7f4;
+  border-radius: 18px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.simpleSourcePanel h2 {
+  color: #10203f;
+  font-size: 18px;
+}
+
+.simpleSourcePanel a {
+  display: grid;
+  gap: 8px;
+}
+
+.simpleSourcePanel a strong {
+  color: #10203f;
+}
+
+.simpleSourcePanel p,
+.simpleSourcePanel small {
+  color: #66718a;
+  line-height: 1.7;
+}
+
+.simpleSourcePanel small {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #5b55d6;
+  font-weight: 900;
+}
+
+.simpleSiteShell .siteFooter {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 44px;
+  border-top: 1px solid #dfe7f4;
+  padding-top: 22px;
+  color: #66718a;
+}
+
+.simpleSiteShell .siteFooter nav {
+  display: flex;
+  gap: 18px;
+  font-weight: 900;
+}
+
+@media (max-width: 860px) {
+  .simpleSiteShell {
+    width: min(100% - 24px, 1120px);
+    padding-top: 18px;
+  }
+
+  .simpleSiteShell .siteHeader,
+  .simpleHero,
+  .simpleArticleHero,
+  .simpleArticleBody {
+    grid-template-columns: 1fr;
+  }
+
+  .simpleArticleGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .simpleSourcePanel {
+    position: static;
+  }
+
+  .simpleSiteShell .siteFooter {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
 /* Light editorial redesign for the public index and its published admin copy. */
 .articleIndexShell {
   color: #061846;

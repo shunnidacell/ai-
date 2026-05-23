@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import {
   HomeArticleExplorer,
   type HomeExplorerArticle,
@@ -18,14 +17,13 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   const visibleStaticArticles = await getVisibleStaticArticles();
   const candidates = await readCandidates();
-  const headlineCandidates = getHeadlineCandidates(candidates);
-  const headlineCandidate = headlineCandidates[0];
+  const headlineCandidate = getHeadlineCandidates(candidates)[0];
   const headlineDraft = headlineCandidate
     ? buildCandidateDraft(headlineCandidate)
     : null;
   const lead = visibleStaticArticles[0];
 
-  if (!lead) {
+  if (!lead && !headlineDraft) {
     throw new Error("表示できる記事がありません。");
   }
 
@@ -33,21 +31,21 @@ export default async function Home() {
     headlineCandidate && headlineDraft
       ? {
           body: headlineDraft.body,
-          date: "編集部選定",
+          date: formatCandidateDate(headlineCandidate.decidedAt ?? headlineCandidate.createdAt),
           excerpt: headlineDraft.summary,
           featuredPost: {
             author: headlineCandidate.author,
             body: headlineDraft.translation,
             handle: headlineCandidate.author,
             likes: "-",
-            newsValue: "Xポスト",
+            newsValue: "元ポスト",
             reposts: "-",
             time: "",
             url: headlineCandidate.url,
           },
           id: headlineCandidate.id,
           image: getCandidateImage(headlineCandidate),
-          label: "注目記事",
+          label: "見出し",
           relatedPosts: [],
           source: headlineCandidate.author,
           title: headlineDraft.title,
@@ -59,7 +57,7 @@ export default async function Home() {
           featuredPost: lead.featuredPost,
           id: lead.id,
           image: lead.image,
-          label: "注目記事",
+          label: "見出し",
           relatedPosts: lead.relatedPosts,
           source: lead.source,
           title: lead.title,
@@ -80,7 +78,7 @@ export default async function Home() {
           body: draft.translation,
           handle: candidate.author,
           likes: "-",
-          newsValue: "Xポスト",
+          newsValue: "元ポスト",
           reposts: "-",
           time: "",
           url: candidate.url,
@@ -94,28 +92,25 @@ export default async function Home() {
       };
     });
 
-  const staticArticleCards: HomeExplorerArticle[] = visibleStaticArticles.map(
-    (article, index) => ({
+  const staticArticleCards: HomeExplorerArticle[] = visibleStaticArticles
+    .filter((article) => article.id !== hero.id)
+    .map((article) => ({
       body: article.body,
       date: article.date,
       excerpt: article.excerpt,
       featuredPost: article.featuredPost,
       id: article.id,
       image: article.image,
-      label: index === 0 ? "最新" : article.category,
+      label: article.category,
       relatedPosts: article.relatedPosts,
       source: article.source,
       title: article.title,
-    }),
-  );
+    }));
 
   const articleCards = [...publishedCandidateCards, ...staticArticleCards];
 
   return (
-    <main
-      className="siteShell fixedBackdropShell homeShell articleIndexShell"
-      style={{ "--page-bg": `url(${hero.image})` } as CSSProperties}
-    >
+    <main className="simpleSiteShell">
       <SiteHeader />
       <HomeArticleExplorer articles={articleCards} hero={hero} />
       <SiteFooter />

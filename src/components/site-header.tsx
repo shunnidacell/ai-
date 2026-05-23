@@ -10,7 +10,7 @@ export function SiteHeader({ admin = false }: { admin?: boolean }) {
         <span className="brandIcon" aria-hidden="true" />
         <span>
           <strong>AI Insight JP</strong>
-          <small>Xから生まれる、AIのいまがわかる。</small>
+          <small>Xブックマークから作るAIニュース</small>
         </span>
       </Link>
 
