@@ -12,10 +12,46 @@ import {
   updateCandidateDraft,
 } from "@/lib/x-candidates";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+
+  if (url.searchParams.get("debug") === "openai") {
+    return NextResponse.json(await checkOpenAIConfig());
+  }
+
   return NextResponse.json({
     candidates: await readCandidates(),
   });
+}
+
+async function checkOpenAIConfig() {
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+
+  if (!apiKey) {
+    return {
+      keyConfigured: false,
+      ok: false,
+      status: null,
+      message: "OPENAI_API_KEY is not configured in this Render service.",
+    };
+  }
+
+  const response = await fetch("https://api.openai.com/v1/models/gpt-4.1", {
+    headers: {
+      authorization: `Bearer ${apiKey}`,
+    },
+  });
+  const detail = await response.text().catch(() => "");
+
+  return {
+    keyConfigured: true,
+    keyShapeLooksValid: apiKey.startsWith("sk-"),
+    ok: response.ok,
+    status: response.status,
+    message: response.ok
+      ? "OpenAI API key can reach the model endpoint."
+      : detail.slice(0, 500),
+  };
 }
 
 export async function POST(request: Request) {
