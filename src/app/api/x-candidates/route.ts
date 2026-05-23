@@ -6,8 +6,8 @@ import {
   readCandidates,
   registerCandidate,
   restoreCandidate,
-  updateCandidateDraft,
   updateCandidateDecision,
+  updateCandidateDraft,
 } from "@/lib/x-candidates";
 
 export async function GET() {
@@ -95,7 +95,6 @@ export async function DELETE(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const body = (await request.json()) as {
-      id?: string;
       decision?: CandidateDecision;
       draft?: {
         body?: string;
@@ -107,6 +106,7 @@ export async function PATCH(request: Request) {
         title?: string;
         translation?: string;
       };
+      id?: string;
     };
 
     if (!body.id || (!body.decision && !body.draft)) {
@@ -153,7 +153,7 @@ export async function PATCH(request: Request) {
       candidate.sourceType !== "developer"
     ) {
       return NextResponse.json(
-        { error: "見出しは大きなニュース・公式一次情報だけに使います。" },
+        { error: "見出しは大きなニュースや一次情報だけに使います。" },
         { status: 400 },
       );
     }

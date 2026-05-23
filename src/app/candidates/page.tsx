@@ -1,4 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
+import { BookmarkIntakeForm } from "@/components/bookmark-intake-form";
 import { CandidateDecisionButtons } from "@/components/candidate-decision-buttons";
 import { CandidateEditForm } from "@/components/candidate-edit-form";
 import { CollectWithHermesButton } from "@/components/collect-with-hermes-button";
@@ -35,6 +36,19 @@ export default async function CandidatesPage() {
   return (
     <main className="simpleSiteShell adminShell">
       <SiteHeader admin />
+
+      <section className="panel bookmarkIntakePanel">
+        <div className="panelHeader">
+          <div>
+            <p className="adminKicker">Xブックマーク</p>
+            <h1>ブックマークしたポストから選ぶ</h1>
+            <p>
+              Xでブックマークした中から記事化したいポストだけを選び、URLを貼って候補に追加します。
+            </p>
+          </div>
+        </div>
+        <BookmarkIntakeForm />
+      </section>
 
       <section className="panel candidatesPanel">
         <div className="panelHeader">
