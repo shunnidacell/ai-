@@ -10,6 +10,7 @@
     "db:migrate-json": "node scripts/migrate-json-to-db.mjs",
     "collect:x": "node scripts/collect-x-post-urls.mjs",
     "collect:x:login": "set X_KEEP_OPEN=1&& node scripts/collect-x-post-urls.mjs",
+    "generate:drafts:local": "node scripts/generate-candidate-drafts-local.mjs",
     "sync:bookmarks": "node scripts/sync-x-bookmarks-with-hermes.mjs",
     "sync:bookmarks:chrome": "node scripts/sync-x-bookmarks-with-chrome.mjs",
     "sync:bookmarks:auto": "node scripts/sync-x-bookmarks-auto.mjs",

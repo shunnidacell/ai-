@@ -41,6 +41,31 @@ async function runOnce() {
       } else {
         console.log(`[${new Date().toLocaleString()}] Bookmark sync exited with code ${code}.`);
       }
+      resolve(code);
+    });
+  });
+
+  await runLocalDraftGeneration();
+}
+
+async function runLocalDraftGeneration() {
+  if (process.env.LOCAL_DRAFT_GENERATION === "0") {
+    return;
+  }
+
+  await new Promise((resolve) => {
+    const child = spawn(process.execPath, ["scripts/generate-candidate-drafts-local.mjs"], {
+      env: process.env,
+      shell: false,
+      stdio: "inherit",
+    });
+
+    child.on("exit", (code) => {
+      if (code === 0) {
+        console.log(`[${new Date().toLocaleString()}] Local draft generation finished.`);
+      } else {
+        console.log(`[${new Date().toLocaleString()}] Local draft generation exited with code ${code}.`);
+      }
       resolve();
     });
   });

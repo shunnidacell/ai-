@@ -242,22 +242,14 @@ export async function registerCandidate(inputUrl: string, meta?: CandidateMeta) 
       postImageUrl: meta?.postImageUrl?.trim() || existing.postImageUrl,
       postText: meta?.postText?.trim() || existing.postText,
     };
-    const aiDraft = shouldGenerateDraft(existing, nextMeta.postText)
-      ? await generateArticleDraftWithOpenAI({
-          author: existing.author,
-          postText: nextMeta.postText ?? "",
-          postUrl: existing.url,
-        })
-      : null;
     const shouldUpdate =
       nextMeta.postImageUrl !== existing.postImageUrl ||
-      nextMeta.postText !== existing.postText ||
-      Boolean(aiDraft);
+      nextMeta.postText !== existing.postText;
 
     if (shouldUpdate) {
       const next = candidates.map((candidate) =>
         candidate.statusId === parsed.statusId
-          ? { ...candidate, ...nextMeta, ...draftToCandidateFields(aiDraft) }
+          ? { ...candidate, ...nextMeta }
           : candidate,
       );
       await writeCandidates(next);
@@ -271,14 +263,6 @@ export async function registerCandidate(inputUrl: string, meta?: CandidateMeta) 
     return { candidate: existing, created: false, updated: false };
   }
 
-  const aiDraft = meta?.postText
-    ? await generateArticleDraftWithOpenAI({
-        author: parsed.author,
-        postText: meta.postText,
-        postUrl: parsed.canonicalUrl,
-      })
-    : null;
-
   const candidate: XPostCandidate = {
     id: `${parsed.author}-${parsed.statusId}`,
     url: parsed.canonicalUrl,
@@ -289,26 +273,12 @@ export async function registerCandidate(inputUrl: string, meta?: CandidateMeta) 
     createdAt: new Date().toISOString(),
     postImageUrl: meta?.postImageUrl?.trim() || undefined,
     postText: meta?.postText?.trim() || undefined,
-    ...draftToCandidateFields(aiDraft),
   };
 
   candidates.unshift(candidate);
   await writeCandidates(candidates);
 
   return { candidate, created: true, updated: false };
-}
-
-function shouldGenerateDraft(candidate: XPostCandidate, postText?: string) {
-  if (!process.env.OPENAI_API_KEY || !postText?.trim()) {
-    return false;
-  }
-
-  return !(
-    candidate.draftTitle ||
-    candidate.draftSummary ||
-    candidate.draftTranslation ||
-    candidate.draftBody?.length
-  );
 }
 
 function draftToCandidateFields(draft: CandidateDraft | null) {
@@ -422,31 +392,17 @@ export async function regenerateCandidateDraft(id: string) {
   const candidate = candidates.find((item) => item.id === id);
 
   if (!candidate) {
-    throw new Error("候補が見つかりません。");
+    throw new Error("Candidate was not found.");
   }
 
   if (!candidate.postText?.trim()) {
-    throw new Error("Xポスト本文がないため、AI再生成できません。");
+    throw new Error("X post text is missing.");
   }
 
-  const aiDraft = await generateArticleDraftWithOpenAI({
-    author: candidate.author,
-    postText: candidate.postText,
-    postUrl: candidate.url,
-  });
-
-  if (!aiDraft) {
-    throw new Error("AI記事生成に失敗しました。APIキー、モデル、利用上限を確認してください。");
-  }
-
-  const next = candidates.map((item) =>
-    item.id === id ? { ...item, ...draftToCandidateFields(aiDraft) } : item,
+  throw new Error(
+    "AI article generation now runs on this PC. Run npm run generate:drafts:local.",
   );
-
-  await writeCandidates(next);
-  return { candidates: next, regenerated: true };
 }
-
 export async function deleteCandidate(id: string) {
   const candidates = await readCandidates();
   const deletedAt = new Date().toISOString();
