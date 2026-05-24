@@ -8,6 +8,7 @@ const adminPassword = process.env.ADMIN_PASSWORD;
 const ollamaUrl = process.env.OLLAMA_URL ?? "http://127.0.0.1:11434";
 const ollamaModel = process.env.OLLAMA_MODEL ?? "gpt-oss:20b";
 const limit = Number(process.env.LOCAL_DRAFT_LIMIT ?? 10);
+const forceRegenerate = process.env.LOCAL_DRAFT_FORCE === "1";
 
 if (!adminUser || !adminPassword) {
   console.error("ADMIN_USER and ADMIN_PASSWORD are missing. Save them in .env.local.");
@@ -27,7 +28,10 @@ if (!ollamaState.ready) {
 const candidates = await fetchCandidates();
 const targets = candidates
   .filter((candidate) => candidate.postText?.trim())
-  .filter((candidate) => !candidate.draftTitle || !candidate.draftSummary)
+  .filter(
+    (candidate) =>
+      forceRegenerate || !candidate.draftTitle || !candidate.draftSummary,
+  )
   .slice(0, limit);
 
 if (targets.length === 0) {
@@ -38,6 +42,9 @@ if (targets.length === 0) {
 
 let updatedCount = 0;
 console.log(`Generating local drafts for ${targets.length} candidates with Ollama ${ollamaModel}.`);
+if (forceRegenerate) {
+  console.log("Force mode is on. Existing drafts may be overwritten.");
+}
 
 for (const candidate of targets) {
   const draft = await generateWithOllama(candidate).catch((error) => {
@@ -150,7 +157,7 @@ async function generateWithOllama(candidate) {
       ],
       model: ollamaModel,
       options: {
-        temperature: 0.35,
+        temperature: 0.45,
       },
       stream: false,
     }),
@@ -190,10 +197,15 @@ function buildPrompt(candidate) {
     "Do not invent prices, dates, benchmark numbers, partnerships, or official facts that are not in the post.",
     "Use a specific title. Include the service name, OSS name, feature name, or what changed.",
     "Never use generic titles like 'AI katsuyo no atarashii sentakushi ni' or 'AI utilization gets a new option'.",
+    "Do not use a fixed article template. Choose the section headings and article structure for this specific post.",
+    "Use 2 to 5 section headings only when they naturally help the story.",
+    "Each heading must be specific to the topic, not generic. Avoid generic headings such as 'なぜ重要なのか', 'まとめ', 'ポイント', or '概要'.",
+    "The body array may contain normal paragraphs and heading strings. Heading strings must start with '### '.",
+    "Include one paragraph exactly as 'ここに元ポストを埋め込みます。' near the beginning.",
     "Return valid JSON only. No markdown. No commentary.",
     "",
     "Required JSON schema:",
-    '{"title":"specific Japanese title","summary":"2 to 4 short Japanese paragraphs for the article card","translation":"Japanese translation for English posts, or a Japanese source memo for Japanese posts","body":["lead paragraph","ここに元ポストを埋め込みます。","explanation below the embedded X post","### なぜ重要なのか","plain explanation","### まとめ","closing summary"],"imagePrompt":"English prompt for a clean editorial AI news image. No text, no logo."}',
+    '{"title":"specific Japanese title","summary":"2 to 4 short Japanese paragraphs for the article card","translation":"Japanese translation for English posts, or a Japanese source memo for Japanese posts","body":["lead paragraph","ここに元ポストを埋め込みます。","paragraph explaining the post","### topic-specific heading chosen by the AI","paragraph","### another topic-specific heading if useful","paragraph"],"imagePrompt":"English prompt for a clean editorial AI news image. No text, no logo."}',
     "",
     `Author: ${candidate.author}`,
     `URL: ${candidate.url}`,
