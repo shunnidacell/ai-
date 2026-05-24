@@ -139,7 +139,7 @@ function CandidateCompactCard({
         <DeleteCandidateButton id={candidate.id} />
       </div>
 
-      <details className="candidateEditDetails">
+      <details className="candidateEditDetails" open>
         <summary>&#32232;&#38598;&#12434;&#38283;&#12367;</summary>
         <CandidateEditForm
           draft={draft}
