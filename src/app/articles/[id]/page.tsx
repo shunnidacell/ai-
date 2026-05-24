@@ -1,9 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ExternalLink } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
+import { XEmbed } from "@/components/x-embed";
 import { getStaticArticleById } from "@/lib/article-visibility";
-import { buildCandidateDraft, readCandidates } from "@/lib/x-candidates";
+import {
+  buildCandidateDraft,
+  getCandidateImage,
+  readCandidates,
+} from "@/lib/x-candidates";
 import type { Article, XPost } from "@/lib/mock-data";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +17,7 @@ type DisplayArticle = {
   category: string;
   date: string;
   excerpt: string;
+  image?: string;
   source: string;
   title: string;
   xPost?: XPost;
@@ -36,7 +41,7 @@ export default async function ArticlePage({
 
       <article className="simpleArticlePage">
         <Link className="simpleBackLink" href="/">
-          ← 記事一覧へ戻る
+          記事一覧へ戻る
         </Link>
 
         <header className="simpleArticleHero">
@@ -48,6 +53,13 @@ export default async function ArticlePage({
               {article.source} / {article.date}
             </small>
           </div>
+          {article.image && (
+            <div
+              aria-hidden="true"
+              className="simpleArticleHeroImage"
+              style={{ backgroundImage: `url(${article.image})` }}
+            />
+          )}
         </header>
 
         <div className="simpleArticleBody">
@@ -64,14 +76,7 @@ export default async function ArticlePage({
           <aside className="simpleSourcePanel">
             <h2>元ポスト</h2>
             {article.xPost ? (
-              <a href={article.xPost.url} rel="noreferrer" target="_blank">
-                <span>{article.xPost.newsValue}</span>
-                <strong>{article.xPost.author}</strong>
-                <p>{article.xPost.body}</p>
-                <small>
-                  Xで開く <ExternalLink size={13} />
-                </small>
-              </a>
+              <XEmbed url={article.xPost.url} />
             ) : (
               <p>元ポストはまだ登録されていません。</p>
             )}
@@ -109,6 +114,7 @@ async function getArticle(id: string): Promise<DisplayArticle | null> {
     category: candidate.decision === "headline" ? "見出し" : "公開",
     date: formatCandidateDate(candidate.decidedAt ?? candidate.createdAt),
     excerpt: draft.summary,
+    image: getCandidateImage(candidate),
     source: candidate.author,
     title: draft.title,
     xPost: {
@@ -130,6 +136,7 @@ function fromStaticArticle(article: Article): DisplayArticle {
     category: article.category,
     date: article.date,
     excerpt: article.excerpt,
+    image: article.image,
     source: article.source,
     title: article.title,
     xPost: article.featuredPost,

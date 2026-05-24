@@ -27,41 +27,56 @@ export function CandidateDecisionButtons({
   mode?: "review" | "public";
 }) {
   const [busy, setBusy] = useState<CandidateDecision | null>(null);
+  const [localCurrent, setLocalCurrent] = useState(current);
+  const [message, setMessage] = useState("");
   const actions = mode === "public" ? publicActions : reviewActions;
 
   async function update(decision: CandidateDecision) {
     setBusy(decision);
-    await fetch("/api/x-candidates", {
+    setMessage("");
+    const response = await fetch("/api/x-candidates", {
       method: "PATCH",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ id, decision }),
     });
-    window.location.reload();
+
+    if (response.ok) {
+      setLocalCurrent(decision);
+      setMessage("更新しました。ページ更新後に一覧へ反映されます。");
+    } else {
+      const result = await response.json().catch(() => ({}));
+      setMessage(result.error ?? "更新に失敗しました。");
+    }
+
+    setBusy(null);
   }
 
   return (
-    <div className="decisionButtons">
-      {actions.map((action) => {
-        const headlineBlocked =
-          action.decision === "headline" && !allowHeadline;
+    <div className="decisionButtonGroup">
+      <div className="decisionButtons">
+        {actions.map((action) => {
+          const headlineBlocked =
+            action.decision === "headline" && !allowHeadline;
 
-        return (
-          <button
-            className={current === action.decision ? "activeDecision" : ""}
-            disabled={Boolean(busy) || headlineBlocked}
-            key={action.decision}
-            onClick={() => update(action.decision)}
-            title={
-              headlineBlocked
-                ? "見出しは大きなニュースや一次情報だけに使います。"
-                : undefined
-            }
-            type="button"
-          >
-            {busy === action.decision ? "更新中" : action.label}
-          </button>
-        );
-      })}
+          return (
+            <button
+              className={localCurrent === action.decision ? "activeDecision" : ""}
+              disabled={Boolean(busy) || headlineBlocked}
+              key={action.decision}
+              onClick={() => update(action.decision)}
+              title={
+                headlineBlocked
+                  ? "見出しは大きなニュースや一次情報だけに使います。"
+                  : undefined
+              }
+              type="button"
+            >
+              {busy === action.decision ? "更新中" : action.label}
+            </button>
+          );
+        })}
+      </div>
+      {message && <p className="decisionMessage">{message}</p>}
     </div>
   );
 }

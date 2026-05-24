@@ -1,11 +1,7 @@
 export function XEmbed({ url }: { url: string }) {
   return (
     <div className="xEmbedWrap">
-      <blockquote
-        className="twitter-tweet"
-        data-dnt="true"
-        data-theme="dark"
-      >
+      <blockquote className="twitter-tweet" data-dnt="true">
         <a href={url}>{url}</a>
       </blockquote>
       <a

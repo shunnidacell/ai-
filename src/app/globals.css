@@ -55,6 +55,12 @@
 }
 
 .simpleHero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 42%);
+  gap: clamp(18px, 4vw, 44px);
+  align-items: center;
+  overflow: hidden;
   border: 1px solid #d7e4ea;
   border-radius: 20px;
   padding: clamp(28px, 5vw, 56px);
@@ -62,6 +68,21 @@
     linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(241, 248, 249, 0.92)),
     radial-gradient(circle at 100% 0%, rgba(100, 204, 197, 0.18), transparent 28rem);
   box-shadow: 0 22px 60px rgba(32, 67, 84, 0.1);
+}
+
+.simpleHeroImage,
+.simpleArticleHeroImage,
+.simpleArticleCardImage {
+  background-position: center;
+  background-size: cover;
+}
+
+.simpleHeroImage {
+  min-height: 280px;
+  border: 1px solid rgba(215, 228, 234, 0.86);
+  border-radius: 18px;
+  background-color: #eef6f8;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .simpleHeroText {
@@ -139,12 +160,20 @@
 .simpleArticleCard {
   display: grid;
   gap: 12px;
+  align-content: start;
   border: 1px solid #d7e4ea;
   border-radius: 18px;
-  padding: 20px;
+  overflow: hidden;
+  padding: 0 20px 20px;
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 18px 44px rgba(32, 67, 84, 0.08);
   transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.simpleArticleCardImage {
+  height: 170px;
+  margin: 0 -20px 2px;
+  background-color: #eef6f8;
 }
 
 .simpleArticleCard:hover {
@@ -171,8 +200,20 @@
 }
 
 .simpleArticleHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 40%);
+  gap: clamp(18px, 4vw, 42px);
+  align-items: center;
   border-bottom: 1px solid #d7e4ea;
   padding-bottom: 30px;
+}
+
+.simpleArticleHeroImage {
+  min-height: 310px;
+  border: 1px solid rgba(215, 228, 234, 0.86);
+  border-radius: 20px;
+  background-color: #eef6f8;
+  box-shadow: 0 18px 44px rgba(32, 67, 84, 0.08);
 }
 
 .simpleArticleHeroText {
@@ -220,6 +261,23 @@
   border-radius: 18px;
   padding: 18px;
   background: rgba(255, 255, 255, 0.86);
+}
+
+.simpleSourcePanel .xEmbedWrap {
+  margin: 0;
+}
+
+.simpleSourcePanel .twitter-tweet,
+.simpleSourcePanel iframe {
+  margin-right: auto !important;
+  margin-left: auto !important;
+}
+
+.decisionMessage {
+  margin-top: 6px;
+  color: #66718a;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .simpleSourcePanel h2 {

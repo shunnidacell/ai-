@@ -40,13 +40,18 @@ export function HomeArticleExplorer({
           <p>{hero.excerpt}</p>
           <Link href={`/articles/${hero.id}`}>記事を読む</Link>
         </div>
+        <div
+          aria-hidden="true"
+          className="simpleHeroImage"
+          style={{ backgroundImage: `url(${hero.image})` }}
+        />
       </section>
 
       <section className="simpleArticleSection">
         <div className="simpleSectionHead">
           <h2>記事一覧</h2>
           <p>
-            ブックマークしたXポストから選んだ記事候補を、確認して公開していくための一覧です。
+            Xブックマークから選んだ記事候補を確認し、公開した記事だけを表示します。
           </p>
         </div>
 
@@ -57,6 +62,11 @@ export function HomeArticleExplorer({
               href={`/articles/${article.id}`}
               key={article.id}
             >
+              <div
+                aria-hidden="true"
+                className="simpleArticleCardImage"
+                style={{ backgroundImage: `url(${article.image})` }}
+              />
               <span>{article.label}</span>
               <h3>{article.title}</h3>
               <p>{article.excerpt}</p>
