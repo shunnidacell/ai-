@@ -50,9 +50,7 @@ export function HomeArticleExplorer({
       <section className="simpleArticleSection">
         <div className="simpleSectionHead">
           <h2>記事一覧</h2>
-          <p>
-            Xブックマークから選んだ記事候補を確認し、公開した記事だけを表示します。
-          </p>
+          <p>Xブックマークから選んだ記事候補のうち、公開した記事だけを表示します。</p>
         </div>
 
         <div className="simpleArticleGrid">
