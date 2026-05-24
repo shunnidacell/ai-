@@ -19,8 +19,8 @@ const baseUrl = siteUrl.replace(/\/$/, "");
 const ollamaState = await getOllamaState();
 
 if (!ollamaState.ready) {
-  console.log(`Ollama未起動: ${ollamaState.reason}`);
-  console.log("Ollamaを起動してから npm run generate:drafts:local を実行してください。");
+  console.log(`Ollama is not ready: ${ollamaState.reason}`);
+  console.log("Start Ollama, then run npm run generate:drafts:local again.");
   process.exit(0);
 }
 
@@ -32,9 +32,11 @@ const targets = candidates
 
 if (targets.length === 0) {
   console.log("No candidates need local draft generation.");
+  console.log("If you expected new drafts, run npm run sync:bookmarks:chrome first.");
   process.exit(0);
 }
 
+let updatedCount = 0;
 console.log(`Generating local drafts for ${targets.length} candidates with Ollama ${ollamaModel}.`);
 
 for (const candidate of targets) {
@@ -48,9 +50,19 @@ for (const candidate of targets) {
     continue;
   }
 
-  await updateCandidateDraft(candidate.id, draft);
-  console.log(`[draft] ${draft.title}`);
+  const updated = await updateCandidateDraft(candidate.id, draft).catch((error) => {
+    console.warn(`Draft update failed. Skipped: ${candidate.url}`);
+    console.warn(error.message);
+    return false;
+  });
+
+  if (updated) {
+    updatedCount += 1;
+    console.log(`[draft] ${draft.title}`);
+  }
 }
+
+console.log(`Local draft generation finished. Updated: ${updatedCount}/${targets.length}.`);
 
 async function fetchCandidates() {
   const response = await fetch(`${baseUrl}/api/x-candidates`, {
@@ -88,6 +100,8 @@ async function updateCandidateDraft(id, draft) {
     const text = await response.text().catch(() => "");
     throw new Error(`Failed to update candidate: ${response.status} ${text}`);
   }
+
+  return true;
 }
 
 async function getOllamaState() {
@@ -104,7 +118,7 @@ async function getOllamaState() {
     if (!models.includes(ollamaModel)) {
       return {
         ready: false,
-        reason: `${ollamaModel} が見つかりません。現在のモデル: ${models.join(", ") || "なし"}`,
+        reason: `${ollamaModel} was not found. Available models: ${models.join(", ") || "none"}`,
       };
     }
 
@@ -112,7 +126,7 @@ async function getOllamaState() {
   } catch (error) {
     return {
       ready: false,
-      reason: error instanceof Error ? error.message : "Ollamaに接続できません。",
+      reason: error instanceof Error ? error.message : "Could not connect to Ollama.",
     };
   }
 }
@@ -170,22 +184,21 @@ function parseModelJson(value) {
 
 function buildPrompt(candidate) {
   return [
-    "あなたは日本語のAIニュースサイト編集者です。",
-    "次のXポストを読み、一般読者にも分かる自然な記事下書きを作ってください。",
-    "英語の投稿は自然な日本語に翻訳してから記事化してください。",
-    "タイトルは具体的にしてください。サービス名、OSS名、機能名、何が新しいのかが分かるタイトルにします。",
-    "『AI活用の新しい選択肢に』『登場、AI活用の新しい選択肢に』のような汎用タイトルは禁止です。",
-    "ポスト本文にない価格、日付、性能値、提携、公式発表の事実を作らないでください。",
-    "断定しすぎず、ポストから分かる範囲と推測を分けて書いてください。",
-    "必ずJSONだけを返してください。",
+    "Write a Japanese AI news article draft from the following X post.",
+    "The output language must be natural Japanese.",
+    "If the post is English, translate and explain it in Japanese.",
+    "Do not invent prices, dates, benchmark numbers, partnerships, or official facts that are not in the post.",
+    "Use a specific title. Include the service name, OSS name, feature name, or what changed.",
+    "Never use generic titles like 'AI katsuyo no atarashii sentakushi ni' or 'AI utilization gets a new option'.",
+    "Return valid JSON only. No markdown. No commentary.",
     "",
-    "必要なJSON形式:",
-    '{"title":"記事タイトル","summary":"記事一覧カード用の説明文。2から4段落","translation":"英語なら日本語訳。日本語なら要点メモ","body":["冒頭リード","ここに元ポストを埋め込みます。","元ポスト下に置く説明","### なぜ重要なのか","補足説明","### まとめ","まとめ文"],"imagePrompt":"English prompt for a clean editorial AI news image. No text, no logo."}',
+    "Required JSON schema:",
+    '{"title":"specific Japanese title","summary":"2 to 4 short Japanese paragraphs for the article card","translation":"Japanese translation for English posts, or a Japanese source memo for Japanese posts","body":["lead paragraph","ここに元ポストを埋め込みます。","explanation below the embedded X post","### なぜ重要なのか","plain explanation","### まとめ","closing summary"],"imagePrompt":"English prompt for a clean editorial AI news image. No text, no logo."}',
     "",
-    `投稿者: ${candidate.author}`,
+    `Author: ${candidate.author}`,
     `URL: ${candidate.url}`,
     "",
-    "Xポスト本文:",
+    "X post text:",
     cleanupText(candidate.postText),
   ].join("\n");
 }
