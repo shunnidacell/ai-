@@ -1,15 +1,23 @@
 import { spawn } from "node:child_process";
+import { existsSync } from "node:fs";
 
 const intervalMinutes = Number(process.env.BOOKMARK_SYNC_INTERVAL_MINUTES ?? 10);
 const intervalMs = Math.max(intervalMinutes, 1) * 60 * 1000;
+const disabledFile = "data/bookmark-sync-disabled";
 
 console.log(`Bookmark auto sync started. Interval: ${intervalMinutes} minutes.`);
+console.log(`Create ${disabledFile} to pause automatic sync.`);
 console.log("Press Ctrl+C to stop.");
 
 await runOnce();
 setInterval(runOnce, intervalMs);
 
 async function runOnce() {
+  if (existsSync(disabledFile)) {
+    console.log(`[${new Date().toLocaleString()}] Bookmark auto sync is paused.`);
+    return;
+  }
+
   const startedAt = new Date();
   console.log(`\n[${startedAt.toLocaleString()}] Syncing X bookmarks...`);
 

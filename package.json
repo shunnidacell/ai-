@@ -12,7 +12,10 @@
     "collect:x:login": "set X_KEEP_OPEN=1&& node scripts/collect-x-post-urls.mjs",
     "sync:bookmarks": "node scripts/sync-x-bookmarks-with-hermes.mjs",
     "sync:bookmarks:chrome": "node scripts/sync-x-bookmarks-with-chrome.mjs",
-    "sync:bookmarks:auto": "node scripts/sync-x-bookmarks-auto.mjs"
+    "sync:bookmarks:auto": "node scripts/sync-x-bookmarks-auto.mjs",
+    "sync:auto:on": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/enable-bookmark-autosync.ps1",
+    "sync:auto:off": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/disable-bookmark-autosync.ps1",
+    "sync:auto:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/bookmark-autosync-status.ps1"
   },
   "dependencies": {
     "lucide-react": "^1.16.0",
