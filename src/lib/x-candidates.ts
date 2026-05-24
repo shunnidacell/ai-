@@ -222,11 +222,31 @@ export function buildCandidateDraft(candidate: XPostCandidate): CandidateDraft {
 }
 
 export function getCandidateImage(candidate: XPostCandidate) {
+  const promptImage = getCandidateGeneratedImage(candidate);
+
   return (
     candidate.imageOverride ??
+    promptImage ??
     candidate.postImageUrl ??
     `/api/x-candidates/${encodeURIComponent(candidate.id)}/image.svg`
   );
+}
+
+function getCandidateGeneratedImage(candidate: XPostCandidate) {
+  if (!candidate.draftImagePrompt?.trim()) {
+    return null;
+  }
+
+  const prompt = [
+    candidate.draftImagePrompt,
+    "editorial AI news image",
+    "high quality",
+    "no text",
+    "no logo",
+  ].join(", ");
+  const seed = encodeURIComponent(candidate.statusId);
+
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1200&height=675&seed=${seed}&nologo=true&enhance=true`;
 }
 
 export async function registerCandidate(inputUrl: string, meta?: CandidateMeta) {
