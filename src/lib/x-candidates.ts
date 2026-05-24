@@ -1,7 +1,6 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { readJsonFromDb, writeJsonToDb } from "@/lib/db-store";
-import { generateArticleDraftWithOpenAI } from "@/lib/openai-article-generator";
 
 export type CandidateDecision = "draft" | "published" | "headline" | "rejected";
 
