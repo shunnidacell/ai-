@@ -16,7 +16,7 @@ export function CandidateEditForm({
   postImageUrl?: string;
   postText?: string;
 }) {
-  const [busy, setBusy] = useState<"save" | "regenerate" | null>(null);
+  const [busy, setBusy] = useState<"save" | null>(null);
   const [message, setMessage] = useState("");
 
   async function save(event: FormEvent<HTMLFormElement>) {
@@ -43,36 +43,21 @@ export function CandidateEditForm({
     window.location.reload();
   }
 
-  async function regenerate() {
-    setBusy("regenerate");
-    setMessage("AIで記事下書きを再生成しています...");
-    const response = await fetch("/api/x-candidates", {
-      method: "PATCH",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ action: "regenerate", id }),
-    });
-    const result = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      setBusy(null);
-      setMessage(result.error ?? "AI再生成に失敗しました。");
-      return;
-    }
-
-    window.location.reload();
-  }
-
   return (
     <form className="candidateEditForm" onSubmit={save}>
       <div className="candidateEditToolbar">
         <button
-          disabled={Boolean(busy) || !postText}
-          onClick={regenerate}
+          onClick={() => {
+            setMessage("PCで npm run generate:drafts:local を実行してください。");
+          }}
           type="button"
         >
-          {busy === "regenerate" ? "AI再生成中" : "AIで再生成"}
+          AI生成はPCで実行
         </button>
-        {message && <span>{message}</span>}
+        <span>
+          {message ||
+            "Ollamaを起動して、PC側で npm run generate:drafts:local を実行します。"}
+        </span>
       </div>
 
       <label>
