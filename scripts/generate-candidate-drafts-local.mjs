@@ -118,16 +118,26 @@ async function getOllamaState() {
 }
 
 async function generateWithOllama(candidate) {
-  const response = await fetch(`${ollamaUrl}/api/generate`, {
+  const response = await fetch(`${ollamaUrl}/api/chat`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
       format: "json",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a Japanese AI news editor. Return only valid JSON in the requested schema.",
+        },
+        {
+          role: "user",
+          content: buildPrompt(candidate),
+        },
+      ],
       model: ollamaModel,
       options: {
         temperature: 0.35,
       },
-      prompt: buildPrompt(candidate),
       stream: false,
     }),
   });
@@ -137,8 +147,25 @@ async function generateWithOllama(candidate) {
   }
 
   const json = await response.json();
-  const parsed = JSON.parse(json.response);
+  const parsed = parseModelJson(json.message?.content ?? json.response);
   return normalizeDraft(parsed);
+}
+
+function parseModelJson(value) {
+  const text = String(value ?? "").trim();
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+
+    if (start >= 0 && end > start) {
+      return JSON.parse(text.slice(start, end + 1));
+    }
+
+    throw new Error("Ollama did not return JSON.");
+  }
 }
 
 function buildPrompt(candidate) {
