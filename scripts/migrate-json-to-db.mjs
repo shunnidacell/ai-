@@ -5,6 +5,7 @@ import pg from "pg";
 const { Pool } = pg;
 
 const databaseUrl = process.env.DATABASE_URL;
+const force = process.env.FORCE_DB_MIGRATION === "1";
 
 if (!databaseUrl) {
   console.error("DATABASE_URL is required.");
@@ -43,6 +44,17 @@ for (const [key, filePath, fallback] of files) {
     // Missing files are fine; defaults are inserted so the DB has all keys.
   }
 
+  if (!force) {
+    const existing = await pool.query("select 1 from app_store where key = $1", [
+      key,
+    ]);
+
+    if (existing.rowCount) {
+      console.log(`kept existing ${key}`);
+      continue;
+    }
+  }
+
   await pool.query(
     `
       insert into app_store (key, value, updated_at)
@@ -52,7 +64,7 @@ for (const [key, filePath, fallback] of files) {
     `,
     [key, JSON.stringify(value)],
   );
-  console.log(`migrated ${key}`);
+  console.log(`${force ? "overwrote" : "seeded"} ${key}`);
 }
 
 await pool.end();
