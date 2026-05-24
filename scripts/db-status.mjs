@@ -1,6 +1,10 @@
 import pg from "pg";
+import { readFile } from "node:fs/promises";
 
 const { Pool } = pg;
+
+await loadDotEnvLocal();
+
 const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
@@ -47,3 +51,29 @@ if (result.rows.length === 0) {
 }
 
 await pool.end();
+
+async function loadDotEnvLocal() {
+  let raw = "";
+
+  try {
+    raw = await readFile(".env.local", "utf8");
+  } catch {
+    return;
+  }
+
+  for (const line of raw.replace(/^\uFEFF/, "").split(/\r?\n/)) {
+    const trimmed = line.trim();
+
+    if (!trimmed || trimmed.startsWith("#")) continue;
+
+    const equalIndex = trimmed.indexOf("=");
+    if (equalIndex <= 0) continue;
+
+    const key = trimmed.slice(0, equalIndex).trim();
+    const value = trimmed.slice(equalIndex + 1).trim().replace(/^['"]|['"]$/g, "");
+
+    if (!process.env[key]) {
+      process.env[key] = value;
+    }
+  }
+}
