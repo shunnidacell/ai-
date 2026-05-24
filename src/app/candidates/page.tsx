@@ -132,17 +132,14 @@ function CandidateCompactCard({
 
       <div className="candidateCompactActions">
         <CandidateDecisionButtons
-          allowHeadline={
-            candidate.sourceType === "official" ||
-            candidate.sourceType === "developer"
-          }
+          allowHeadline
           current={candidate.decision}
           id={candidate.id}
         />
         <DeleteCandidateButton id={candidate.id} />
       </div>
 
-      <details className="candidateEditDetails" open>
+      <details className="candidateEditDetails">
         <summary>&#32232;&#38598;&#12434;&#38283;&#12367;</summary>
         <CandidateEditForm
           draft={draft}

@@ -577,11 +577,11 @@
 }
 
 .candidateDenseShell {
-  width: min(1380px, calc(100% - 32px));
+  width: min(1540px, calc(100% - 24px));
 }
 
 .candidateDenseShell .compactPanel {
-  padding: 16px;
+  padding: 12px;
 }
 
 .candidateDenseShell .panelHeader {
@@ -609,16 +609,16 @@
 
 .candidateCompactList {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .candidateCompactCard {
   display: grid;
-  gap: 12px;
+  gap: 8px;
   border: 1px solid #d7e4ea;
-  border-radius: 16px;
-  padding: 14px;
+  border-radius: 12px;
+  padding: 10px;
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 14px 34px rgba(32, 67, 84, 0.07);
 }
@@ -627,8 +627,8 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 6px;
+  margin-bottom: 6px;
 }
 
 .candidateCompactMeta strong {
@@ -655,17 +655,17 @@
 
 .candidateCompactMain h2 {
   color: #102033;
-  font-size: 17px;
+  font-size: 14px;
   line-height: 1.45;
 }
 
 .candidateCompactMain p {
   display: -webkit-box;
   overflow: hidden;
-  margin-top: 7px;
+  margin-top: 5px;
   color: #66718a;
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: 12px;
+  line-height: 1.5;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
@@ -673,8 +673,9 @@
 .candidateEmbedBox {
   overflow: hidden;
   border: 1px solid #e4edf1;
-  border-radius: 14px;
+  border-radius: 10px;
   background: #f8fbfc;
+  max-height: 230px;
 }
 
 .candidateEmbedBox .xEmbedWrap {
@@ -690,19 +691,19 @@
   display: flex;
   margin: 0;
   border: 0;
-  padding: 12px;
+  padding: 8px;
 }
 
 .candidateCompactActions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
 }
 
 .candidateEditDetails {
   border-top: 1px solid #e4edf1;
-  padding-top: 10px;
+  padding-top: 8px;
 }
 
 .candidateEditDetails summary {

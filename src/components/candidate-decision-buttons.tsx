@@ -16,7 +16,6 @@ const publicActions: Array<{ decision: CandidateDecision; label: string }> = [
 ];
 
 export function CandidateDecisionButtons({
-  allowHeadline,
   current,
   id,
   mode = "review",
@@ -54,27 +53,17 @@ export function CandidateDecisionButtons({
   return (
     <div className="decisionButtonGroup">
       <div className="decisionButtons">
-        {actions.map((action) => {
-          const headlineBlocked =
-            action.decision === "headline" && !allowHeadline;
-
-          return (
-            <button
-              className={localCurrent === action.decision ? "activeDecision" : ""}
-              disabled={Boolean(busy) || headlineBlocked}
-              key={action.decision}
-              onClick={() => update(action.decision)}
-              title={
-                headlineBlocked
-                  ? "見出しは大きなニュースや一次情報だけに使います。"
-                  : undefined
-              }
-              type="button"
-            >
-              {busy === action.decision ? "更新中" : action.label}
-            </button>
-          );
-        })}
+        {actions.map((action) => (
+          <button
+            className={localCurrent === action.decision ? "activeDecision" : ""}
+            disabled={Boolean(busy)}
+            key={action.decision}
+            onClick={() => update(action.decision)}
+            type="button"
+          >
+            {busy === action.decision ? "更新中" : action.label}
+          </button>
+        ))}
       </div>
       {message && <p className="decisionMessage">{message}</p>}
     </div>

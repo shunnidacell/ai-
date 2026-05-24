@@ -162,17 +162,6 @@ export async function PATCH(request: Request) {
       );
     }
 
-    if (
-      body.decision === "headline" &&
-      candidate.sourceType !== "official" &&
-      candidate.sourceType !== "developer"
-    ) {
-      return NextResponse.json(
-        { error: "見出しは大きなニュースや一次情報だけに使います。" },
-        { status: 400 },
-      );
-    }
-
     return NextResponse.json(
       await updateCandidateDecision(body.id, body.decision),
     );
