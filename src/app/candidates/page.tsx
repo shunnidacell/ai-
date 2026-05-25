@@ -5,6 +5,7 @@ import { CandidateEditForm } from "@/components/candidate-edit-form";
 import { CollectWithHermesButton } from "@/components/collect-with-hermes-button";
 import { DeleteCandidateButton } from "@/components/delete-candidate-button";
 import { DeletedItemActions } from "@/components/deleted-item-actions";
+import { LocalAutomationPanel } from "@/components/local-automation-panel";
 import { SiteHeader } from "@/components/site-header";
 import { XEmbed } from "@/components/x-embed";
 import {
@@ -36,6 +37,8 @@ export default async function CandidatesPage() {
   return (
     <main className="simpleSiteShell adminShell candidateDenseShell">
       <SiteHeader admin />
+
+      <LocalAutomationPanel />
 
       <section className="panel bookmarkIntakePanel compactPanel">
         <div className="panelHeader">

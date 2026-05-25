@@ -7,6 +7,7 @@ const protectedPaths = [
   "/api/site-pages",
   "/api/x-candidates",
   "/api/hermes",
+  "/api/local-automation",
 ];
 
 export function middleware(request: NextRequest) {
@@ -58,5 +59,6 @@ export const config = {
     "/api/site-pages/:path*",
     "/api/x-candidates/:path*",
     "/api/hermes/:path*",
+    "/api/local-automation/:path*",
   ],
 };

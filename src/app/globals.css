@@ -713,6 +713,94 @@
   align-items: center;
 }
 
+.localAutomationPanel {
+  border-color: rgba(32, 108, 124, 0.16);
+  background:
+    linear-gradient(135deg, rgba(236, 251, 252, 0.88), rgba(255, 255, 255, 0.96));
+}
+
+.localAutomationIconButton,
+.localAutomationActions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  border: 1px solid rgba(32, 108, 124, 0.22);
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: #ffffff;
+  color: #123345;
+  font-weight: 900;
+}
+
+.localAutomationIconButton:hover,
+.localAutomationActions button:hover {
+  border-color: rgba(32, 108, 124, 0.42);
+  box-shadow: 0 10px 24px rgba(32, 67, 84, 0.08);
+}
+
+.localAutomationActions button:first-child {
+  border-color: rgba(16, 112, 136, 0.28);
+  background: linear-gradient(135deg, #166f87, #259d9a);
+  color: #ffffff;
+}
+
+.localAutomationActions button:disabled,
+.localAutomationIconButton:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.localAutomationStatus,
+.localAutomationActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.localAutomationStatus span {
+  border: 1px solid rgba(32, 108, 124, 0.14);
+  border-radius: 999px;
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.86);
+  color: #176b87;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.localAutomationMessage {
+  margin: 12px 0;
+  color: #526174;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.localAutomationLog {
+  margin-top: 12px;
+}
+
+.localAutomationLog summary {
+  color: #176b87;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.localAutomationLog pre {
+  overflow: auto;
+  max-height: 260px;
+  margin-top: 8px;
+  border: 1px solid #d7e4ea;
+  border-radius: 8px;
+  padding: 10px;
+  background: #102033;
+  color: #dce9ee;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
 .candidateEditDetails {
   border-top: 1px solid #e4edf1;
   padding-top: 8px;
