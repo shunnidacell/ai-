@@ -1,4 +1,4 @@
-import { spawn, spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -7,23 +7,11 @@ export const runtime = "nodejs";
 
 const projectDir = process.cwd();
 const dataDir = path.join(projectDir, "data");
-const disabledFile = path.join(dataDir, "bookmark-sync-disabled");
 const statusFile = path.join(dataDir, "local-automation-status.json");
 const logFile = path.join(dataDir, "local-automation.log");
-const startupFile = path.join(
-  process.env.APPDATA ?? "",
-  "Microsoft",
-  "Windows",
-  "Start Menu",
-  "Programs",
-  "Startup",
-  "AI Insight JP X Bookmark Auto Sync.cmd",
-);
 
 type LocalStatus = {
   available: boolean;
-  startupEnabled: boolean;
-  paused: boolean;
   message: string;
   taskStatus: unknown;
   recentLog: string;
@@ -45,35 +33,6 @@ export async function POST(request: Request) {
       },
       { status: 409 },
     );
-  }
-
-  if (action === "enable") {
-    const result = runPowerShellScript("enable-bookmark-autosync.ps1");
-    if (result.status !== 0) {
-      return Response.json(
-        { error: result.stderr || result.stdout || "自動同期をオンにできませんでした。" },
-        { status: 500 },
-      );
-    }
-    startPowerShellScript("start-bookmark-autosync.ps1");
-    return Response.json({
-      ...readLocalStatus(),
-      message: "自動同期をオンにして、今すぐバックグラウンド開始しました。",
-    });
-  }
-
-  if (action === "disable") {
-    const result = runPowerShellScript("disable-bookmark-autosync.ps1");
-    if (result.status !== 0) {
-      return Response.json(
-        { error: result.stderr || result.stdout || "自動同期をオフにできませんでした。" },
-        { status: 500 },
-      );
-    }
-    return Response.json({
-      ...readLocalStatus(),
-      message: "自動同期をオフにしました。",
-    });
   }
 
   if (action === "sync-and-generate") {
@@ -99,10 +58,8 @@ function readLocalStatus(): LocalStatus {
   const available = isLocalAutomationAvailable();
   return {
     available,
-    startupEnabled: safeExists(startupFile),
-    paused: safeExists(disabledFile),
     message: available
-      ? "PC側のローカル操作が使えます。"
+      ? "手動操作が使えます。必要な時だけボタンを押してください。"
       : "Render上では使えません。PCでローカル管理画面を開くと使えます。",
     taskStatus: readJson(statusFile),
     recentLog: readRecentLog(),
@@ -113,8 +70,8 @@ function isLocalAutomationAvailable() {
   return process.platform === "win32" && !process.env.RENDER;
 }
 
-function runPowerShellScript(scriptName: string) {
-  return spawnSync(
+function startPowerShellScript(scriptName: string, task: string) {
+  const child = spawn(
     "powershell.exe",
     [
       "-NoProfile",
@@ -122,43 +79,18 @@ function runPowerShellScript(scriptName: string) {
       "Bypass",
       "-File",
       path.join(projectDir, "scripts", scriptName),
+      "-Task",
+      task,
     ],
     {
       cwd: projectDir,
-      encoding: "utf8",
+      detached: true,
+      stdio: "ignore",
+      windowsHide: true,
     },
   );
-}
-
-function startPowerShellScript(scriptName: string, task?: string) {
-  const args = [
-    "-NoProfile",
-    "-ExecutionPolicy",
-    "Bypass",
-    "-File",
-    path.join(projectDir, "scripts", scriptName),
-  ];
-
-  if (task) {
-    args.push("-Task", task);
-  }
-
-  const child = spawn("powershell.exe", args, {
-    cwd: projectDir,
-    detached: true,
-    stdio: "ignore",
-    windowsHide: true,
-  });
 
   child.unref();
-}
-
-function safeExists(filePath: string) {
-  try {
-    return Boolean(filePath) && fs.existsSync(filePath);
-  } catch {
-    return false;
-  }
 }
 
 function readJson(filePath: string) {

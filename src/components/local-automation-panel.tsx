@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { Bot, FileText, Play, Power, RefreshCw } from "lucide-react";
+import { FileText, Play, RefreshCw } from "lucide-react";
 
 type AutomationStatus = {
   available: boolean;
-  startupEnabled: boolean;
-  paused: boolean;
   message: string;
   taskStatus: {
     phase?: string;
@@ -19,8 +17,6 @@ type AutomationStatus = {
 
 const initialStatus: AutomationStatus = {
   available: false,
-  startupEnabled: false,
-  paused: false,
   message: "状態を読み込み中です。",
   taskStatus: null,
   recentLog: "",
@@ -38,7 +34,7 @@ export function LocalAutomationPanel() {
   }
 
   async function runAction(action: string) {
-    setMessage("操作を送信しています。");
+    setMessage("処理を開始しています。");
     startTransition(async () => {
       const response = await fetch("/api/local-automation", {
         method: "POST",
@@ -51,7 +47,7 @@ export function LocalAutomationPanel() {
         return;
       }
       setStatus(result);
-      setMessage(result.message ?? "操作しました。");
+      setMessage(result.message ?? "処理を開始しました。");
       window.setTimeout(loadStatus, 1200);
     });
   }
@@ -64,16 +60,17 @@ export function LocalAutomationPanel() {
 
   const taskMessage =
     status.taskStatus?.message ??
-    (status.paused ? "自動同期は停止中です。" : "自動同期は利用できます。");
+    "手動モードです。必要な時だけボタンを押して同期・記事生成します。";
 
   return (
     <section className="panel localAutomationPanel compactPanel">
       <div className="panelHeader">
         <div>
-          <p className="adminKicker">PC自動化</p>
-          <h1>ブックマーク同期と記事生成</h1>
+          <p className="adminKicker">手動操作</p>
+          <h1>Xブックマーク同期と記事生成</h1>
           <p>
             PC側のChromeでXブックマークを読み込み、Ollamaで未生成の記事本文を作ります。
+            10分ごとの自動実行は使いません。
           </p>
         </div>
         <button className="localAutomationIconButton" onClick={loadStatus} type="button">
@@ -84,8 +81,7 @@ export function LocalAutomationPanel() {
 
       <div className="localAutomationStatus">
         <span>{status.available ? "ローカル操作OK" : "Renderでは操作不可"}</span>
-        <span>{status.startupEnabled ? "PC起動時オン" : "PC起動時オフ"}</span>
-        <span>{status.paused ? "停止中" : "有効"}</span>
+        <span>手動モード</span>
         {status.taskStatus?.running && <span>実行中: {status.taskStatus.phase}</span>}
       </div>
 
@@ -107,22 +103,6 @@ export function LocalAutomationPanel() {
         >
           <FileText size={16} />
           未生成だけ記事生成
-        </button>
-        <button
-          disabled={!status.available || isPending}
-          onClick={() => runAction("enable")}
-          type="button"
-        >
-          <Bot size={16} />
-          自動同期オン
-        </button>
-        <button
-          disabled={!status.available || isPending}
-          onClick={() => runAction("disable")}
-          type="button"
-        >
-          <Power size={16} />
-          自動同期オフ
         </button>
       </div>
 

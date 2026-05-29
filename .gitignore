@@ -25,6 +25,9 @@
 *.pem
 .x-browser-profile/
 .codegraph/
+data/bookmark-sync-disabled
+data/local-automation-status.json
+data/local-automation.log
 
 # debug
 npm-debug.log*
