@@ -12,6 +12,7 @@ const logFile = path.join(dataDir, "local-automation.log");
 
 type LocalStatus = {
   available: boolean;
+  geminiConfigured: boolean;
   message: string;
   taskStatus: unknown;
   recentLog: string;
@@ -29,7 +30,17 @@ export async function POST(request: Request) {
     return Response.json(
       {
         error:
-          "この操作はPC側のローカル管理画面でだけ使えます。Render上ではChrome/Ollamaを操作できません。",
+          "この操作はPC側のローカル管理画面でだけ使えます。Render上ではPCのChromeを操作できません。",
+      },
+      { status: 409 },
+    );
+  }
+
+  if (!process.env.GEMINI_API_KEY) {
+    return Response.json(
+      {
+        error:
+          "GEMINI_API_KEYが未設定です。.env.localに設定して開発サーバーを再起動してください。",
       },
       { status: 409 },
     );
@@ -56,10 +67,14 @@ export async function POST(request: Request) {
 
 function readLocalStatus(): LocalStatus {
   const available = isLocalAutomationAvailable();
+  const geminiConfigured = Boolean(process.env.GEMINI_API_KEY);
   return {
     available,
-    message: available
-      ? "手動操作が使えます。必要な時だけボタンを押してください。"
+    geminiConfigured,
+    message: !geminiConfigured
+      ? "GEMINI_API_KEYが未設定です。設定後に開発サーバーを再起動してください。"
+      : available
+        ? "手動操作が使えます。必要な時だけボタンを押してください。"
       : "Render上では使えません。PCでローカル管理画面を開くと使えます。",
     taskStatus: readJson(statusFile),
     recentLog: readRecentLog(),

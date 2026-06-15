@@ -420,7 +420,7 @@ export async function regenerateCandidateDraft(id: string) {
   }
 
   throw new Error(
-    "AI article generation now runs on this PC. Run npm run generate:drafts:local.",
+    "Gemini article generation runs from the manual controls on the candidates page.",
   );
 }
 export async function deleteCandidate(id: string) {

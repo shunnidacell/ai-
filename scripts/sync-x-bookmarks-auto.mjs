@@ -49,12 +49,12 @@ async function runOnce() {
 }
 
 async function runLocalDraftGeneration() {
-  if (process.env.LOCAL_DRAFT_GENERATION === "0") {
+  if (process.env.GEMINI_DRAFT_GENERATION === "0") {
     return;
   }
 
   await new Promise((resolve) => {
-    const child = spawn(process.execPath, ["scripts/generate-candidate-drafts-local.mjs"], {
+    const child = spawn(process.execPath, ["scripts/generate-candidate-drafts-gemini.mjs"], {
       env: process.env,
       shell: false,
       stdio: "inherit",
@@ -62,9 +62,9 @@ async function runLocalDraftGeneration() {
 
     child.on("exit", (code) => {
       if (code === 0) {
-        console.log(`[${new Date().toLocaleString()}] Local draft generation finished.`);
+        console.log(`[${new Date().toLocaleString()}] Gemini draft generation finished.`);
       } else {
-        console.log(`[${new Date().toLocaleString()}] Local draft generation exited with code ${code}.`);
+        console.log(`[${new Date().toLocaleString()}] Gemini draft generation exited with code ${code}.`);
       }
       resolve();
     });

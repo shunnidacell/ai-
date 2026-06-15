@@ -48,15 +48,17 @@ export function CandidateEditForm({
       <div className="candidateEditToolbar">
         <button
           onClick={() => {
-            setMessage("PCで npm run generate:drafts:local を実行してください。");
+            setMessage(
+              "候補ページ上部の「未生成だけ記事生成」を押してください。",
+            );
           }}
           type="button"
         >
-          AI生成はPCで実行
+          Geminiで再生成
         </button>
         <span>
           {message ||
-            "Ollamaを起動して、PC側で npm run generate:drafts:local を実行します。"}
+            "Gemini APIによる生成は候補ページ上部の手動ボタンから実行します。"}
         </span>
       </div>
 

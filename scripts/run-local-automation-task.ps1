@@ -62,10 +62,10 @@ if ($Task -eq "sync-and-generate") {
   }
 }
 
-Write-Status -Phase "generating" -Running $true -Message "Ollamaで記事本文を生成しています。"
-$generateExit = Invoke-LoggedCommand -Label "Generate local drafts" -Command @("npm.cmd", "run", "generate:drafts:local")
+Write-Status -Phase "generating" -Running $true -Message "Gemini APIで記事本文を生成しています。"
+$generateExit = Invoke-LoggedCommand -Label "Generate drafts with Gemini" -Command @("npm.cmd", "run", "generate:drafts:gemini")
 if ($generateExit -ne 0) {
-  Write-Status -Phase "failed" -Running $false -ExitCode $generateExit -Message "記事本文生成に失敗しました。Ollamaの起動状態を確認してください。"
+  Write-Status -Phase "failed" -Running $false -ExitCode $generateExit -Message "記事本文生成に失敗しました。Gemini APIキー、モデル、無料枠の上限を確認してください。"
   exit $generateExit
 }
 

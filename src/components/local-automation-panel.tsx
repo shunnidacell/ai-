@@ -5,6 +5,7 @@ import { FileText, Play, RefreshCw } from "lucide-react";
 
 type AutomationStatus = {
   available: boolean;
+  geminiConfigured: boolean;
   message: string;
   taskStatus: {
     phase?: string;
@@ -17,6 +18,7 @@ type AutomationStatus = {
 
 const initialStatus: AutomationStatus = {
   available: false,
+  geminiConfigured: false,
   message: "状態を読み込み中です。",
   taskStatus: null,
   recentLog: "",
@@ -58,9 +60,10 @@ export function LocalAutomationPanel() {
     return () => window.clearInterval(timer);
   }, []);
 
-  const taskMessage =
-    status.taskStatus?.message ??
-    "手動モードです。必要な時だけボタンを押して同期・記事生成します。";
+  const taskMessage = status.geminiConfigured
+    ? status.taskStatus?.message ??
+      "手動モードです。必要な時だけボタンを押して同期・記事生成します。"
+    : status.message;
 
   return (
     <section className="panel localAutomationPanel compactPanel">
@@ -69,7 +72,7 @@ export function LocalAutomationPanel() {
           <p className="adminKicker">手動操作</p>
           <h1>Xブックマーク同期と記事生成</h1>
           <p>
-            PC側のChromeでXブックマークを読み込み、Ollamaで未生成の記事本文を作ります。
+            PC側のChromeでXブックマークを読み込み、Gemini APIで未生成の記事本文を作ります。
             10分ごとの自動実行は使いません。
           </p>
         </div>
@@ -81,6 +84,11 @@ export function LocalAutomationPanel() {
 
       <div className="localAutomationStatus">
         <span>{status.available ? "ローカル操作OK" : "Renderでは操作不可"}</span>
+        <span>
+          {status.geminiConfigured
+            ? "Gemini API接続設定済み"
+            : "Gemini APIキー未設定"}
+        </span>
         <span>手動モード</span>
         {status.taskStatus?.running && <span>実行中: {status.taskStatus.phase}</span>}
       </div>
@@ -89,7 +97,7 @@ export function LocalAutomationPanel() {
 
       <div className="localAutomationActions">
         <button
-          disabled={!status.available || isPending}
+          disabled={!status.available || !status.geminiConfigured || isPending}
           onClick={() => runAction("sync-and-generate")}
           type="button"
         >
@@ -97,7 +105,7 @@ export function LocalAutomationPanel() {
           今すぐ同期して記事生成
         </button>
         <button
-          disabled={!status.available || isPending}
+          disabled={!status.available || !status.geminiConfigured || isPending}
           onClick={() => runAction("generate")}
           type="button"
         >
