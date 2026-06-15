@@ -1,0 +1,45 @@
+AIニュースサイト 操作メモ
+
+【管理画面を起動する】
+1. PowerShellを開く
+2. 以下を順番に実行する
+
+cd C:\Users\owner\Documents\Codex\2026-05-17\x-ai-web
+npm run dev
+
+3. 「Ready」と表示されたら、次のページを開く
+
+http://localhost:3000/candidates
+
+PowerShellは、作業中は閉じない。
+
+
+【記事を作る】
+「今すぐ同期して記事生成」
+Xブックマークを読み込み、Gemini APIでタイトル・要約・本文を生成する。
+
+「未生成だけ記事生成」
+登録済みで、まだ記事が生成されていない候補だけを生成する。
+
+
+【終了する】
+PowerShellで Ctrl + C を押す。
+
+
+【よくある表示】
+Port 3000 is in use
+すでにサイトが起動している。そのまま次を開けばよい。
+
+http://localhost:3000/candidates
+
+GEMINI_API_KEYが未設定
+.env.localのGEMINI_API_KEYを確認し、npm run devをやり直す。
+
+
+【公開サイト】
+https://ai-3636.onrender.com/
+
+【Renderの候補管理】
+https://ai-3636.onrender.com/candidates
+
+※ ChromeとGeminiを使った記事生成ボタンは、localhost側で操作する。
