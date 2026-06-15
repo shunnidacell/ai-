@@ -12,6 +12,12 @@ const protectedPaths = [
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const hostname = request.nextUrl.hostname;
+
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    return NextResponse.next();
+  }
+
   if (
     pathname.startsWith("/api/x-candidates/") &&
     pathname.endsWith("/image.svg")
